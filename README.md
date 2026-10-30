@@ -4,8 +4,6 @@
 
 <p align="center">An R package for visualising any panel (longitudinal) data: say which column is the individual and which is time, and get publication-ready charts.</p>
 
-> **Preview — v0.0.1.** Works and is tested on eight public panels, but the API may still change; see [Known issues](#known-issues-v001). Feedback welcome via GitHub issues.
-
 ## Why
 
 Panel data is a common data shape: the same individuals measured again and again over time, stored as one row per
@@ -492,7 +490,7 @@ panel_line(gm, "lifeExp", by = "continent", return = "table")
 > **Not to be confused with [panelView](https://cran.r-project.org/package=panelView)** on CRAN, which plots treatment
 > status and outcomes for causal-inference panels. panelviz is a general toolkit: import, aggregate and chart any panel.
 
-## Known issues (v0.0.1)
+## Known issues
 
 1. Not on CRAN yet.
 2. Stata `%tw` weeks are read approximately.

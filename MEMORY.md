@@ -26,4 +26,5 @@
   output and images into README between the `examples:` markers. Needs internet. Edit the examples there, not in README.
 - **Test data:** `Rscript data-raw/fetch.R`, then `Rscript data-raw/check_examples.R` (8 public datasets).
 - **Fonts:** best condensed face via `systemfonts`; on this Mac it is Avenir Next Condensed. Save with `ragg`.
+- **v1.0.0 released 2026-10-30** (preview banner removed; tag `v1.0.0`, GitHub release with the source tarball). `R CMD check --as-cran` has only environment notes. Not on CRAN yet: `cran-comments.md` and `NEWS.md` exist.
 - **Published** at github.com/moralec/panelviz (public, 2026-10-30). Logo: ; `assets/logo.svg` is the panel-grid logo (option 2), chosen by the user. `Rscript data-raw/logo.R` regenerates the options.
