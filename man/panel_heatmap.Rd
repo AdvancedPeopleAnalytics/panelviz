@@ -14,8 +14,10 @@ panel_heatmap(
   min_n = NULL,
   max_rows = 40,
   diverge = FALSE,
-  palette = c("#eef5f9", "#b5dcee", "#00a0dc", "#00587a", "#00293d"),
+  palette = NULL,
   tag = NULL,
+  source = NULL,
+  style = NULL,
   return = c("plot", "table"),
   title = NULL,
   subtitle = NULL
@@ -52,6 +54,10 @@ periods collapse into one (default \code{"mean"}; use \code{"sum"} for flows).}
 \item{palette}{Vector of colours for the sequential scale.}
 
 \item{tag}{Optional figure number or label, drawn in a square at the top right.}
+
+\item{source}{Source line for the footer; default is the source given to \code{\link[=as_panel]{as_panel()}}.}
+
+\item{style}{Look for this chart: one of \code{\link[=panel_styles]{panel_styles()}}.}
 
 \item{return}{\code{"plot"} or \code{"table"}.}
 

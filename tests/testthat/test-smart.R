@@ -44,7 +44,7 @@ test_that("column labels are used and titles can be switched to plain", {
   x <- d; attr(x$a, "label") <- "annual income (USD)"
   px <- as_panel(x, who, yr)
   expect_match(panel_line(px, "a")$labels$title, "^Annual income \\(USD\\)")
-  op <- options(tidyPanel.smart_titles = FALSE); on.exit(options(op))
+  op <- options(panelviz.smart_titles = FALSE); on.exit(options(op))
   expect_equal(panel_line(px, "a")$labels$title, "Annual income (USD)")
   expect_equal(panel_line(p, "a", title = "Mine")$labels$title, "Mine")
 })

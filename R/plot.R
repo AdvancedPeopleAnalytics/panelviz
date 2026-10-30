@@ -24,7 +24,7 @@ period_breaks <- function(periods, n = 8, freq = NULL) {
 }
 
 # Value axis with short labels (6 M instead of 6e+06).
-y_scale <- function(log = FALSE, labeller = NULL, position = "right") {
+y_scale <- function(log = FALSE, labeller = NULL, position = style_spec()$y_pos) {
   lab <- labeller %||% scales::label_number(scale_cut = scales::cut_short_scale(), style_negative = "minus")
   if (log) ggplot2::scale_y_log10(labels = lab, position = position) else ggplot2::scale_y_continuous(labels = lab, position = position)
 }
@@ -41,12 +41,14 @@ time_scale <- function(info, periods, expand = ggplot2::waiver(), position = "bo
                           labels = period_labels(info$freq), position = position)
 }
 
-caption_for <- function(tab, info, var_note = NULL) {
+caption_for <- function(tab, info, var_note = NULL, source = NULL) {
   fq <- if (identical(info$freq, "all")) info$freq_native else info$freq
   rng <- if (info$kind == "index") paste(info$range, collapse = " to ") else
     paste(period_text(fq)(info$range), collapse = " to ")
-  paste0(c(var_note, sprintf("%s individuals, %s", format(info$n_ids, big.mark = ","), rng),
-           if (!is.null(info$min_n)) sprintf("groups under %d individuals hidden", info$min_n)), collapse = " | ")
+  src <- source %||% info$source
+  notes <- paste0(c(var_note, sprintf("%s individuals, %s", format(info$n_ids, big.mark = ","), rng),
+                    if (!is.null(info$min_n)) sprintf("groups under %d individuals hidden", info$min_n)), collapse = " | ")
+  paste(c(if (!is.null(src)) paste0("Source: ", src), notes), collapse = "\n")
 }
 
 summary_note <- function(fun_group, by) {
@@ -72,6 +74,8 @@ group_col <- function(tab, by) {
 #' @param index Rebase every group so its first period equals 100.
 #' @param log Use a log10 value axis.
 #' @param max_groups Keep only this many groups (largest by individuals).
+#' @param source Source line for the footer; default is the source given to [as_panel()].
+#' @param style Look for this chart: one of [panel_styles()].
 #' @param tag Optional figure number or label, drawn in a square at the top right.
 #' @param return `"plot"` or `"table"`.
 #' @param title,subtitle Optional text; defaults are generated.
@@ -79,8 +83,9 @@ group_col <- function(tab, by) {
 #' @export
 panel_line <- function(x, var, by = NULL, period = NULL, fun_time = "mean", fun_group = "mean",
                        min_n = NULL, facet = FALSE, max_groups = 10, highlight = NULL, index = FALSE,
-                       log = FALSE, tag = NULL, return = c("plot", "table"), title = NULL, subtitle = NULL) {
+                       log = FALSE, tag = NULL, source = NULL, style = NULL, return = c("plot", "table"), title = NULL, subtitle = NULL) {
   return <- match.arg(return)
+  rlang::local_options(panelviz.style = style %||% getOption("panelviz.style", "economist"))
   tab <- panel_aggregate(x, var, by = by, period = period, fun_time = fun_time,
                          fun_group = fun_group, min_n = min_n)
   info <- attr(tab, "panel_info")
@@ -101,15 +106,15 @@ panel_line <- function(x, var, by = NULL, period = NULL, fun_time = "mean", fun_
     ggplot2::geom_line(linewidth = 1.3, show.legend = FALSE) +
     ggplot2::scale_colour_manual(values = group_colours(tab$.group, highlight)) +
     time_scale(info, tab$.period, expand = ggplot2::expansion(mult = c(0.02, if (many) 0.18 else 0.04))) +
-    y_scale(log, axis_labeller(var, tab[[var]], fun_group)) +
+    y_scale(log, axis_labeller(var, tab[[var]], fun_group), position = if (facet) "left" else style_spec()$y_pos) +
     ggplot2::coord_cartesian(clip = "off") +
     ggplot2::labs(title = title %||% txt$title,
                   subtitle = subtitle %||% txt$subtitle,
-                  caption = caption_for(tab, info, if (index) paste0("Indexed: first period = 100"))) +
+                  caption = caption_for(tab, info, source = source, if (index) paste0("Indexed: first period = 100"))) +
     panel_style(tag)
   if (many) p <- p + ggplot2::geom_text(data = lab_end, ggplot2::aes(y = .data$.y, label = .data$.group),
-                                        hjust = 0, nudge_x = label_nudge(tab, info), size = 3.6,
-                                        fontface = "bold", show.legend = FALSE)
+                                        hjust = 0, nudge_x = label_nudge(tab, info), size = 4.2,
+                                        fontface = "bold", family = panel_font(), show.legend = FALSE)
   if (facet) p <- p + ggplot2::facet_wrap(ggplot2::vars(.data$.group), scales = "free_y")
   p
 }
@@ -124,9 +129,10 @@ panel_line <- function(x, var, by = NULL, period = NULL, fun_time = "mean", fun_
 #' @export
 panel_heatmap <- function(x, var, by = NULL, period = NULL, fun_time = "mean", fun_group = "mean",
                           min_n = NULL, max_rows = 40, diverge = FALSE,
-                          palette = c("#eef5f9", "#b5dcee", "#00a0dc", "#00587a", "#00293d"),
-                          tag = NULL, return = c("plot", "table"), title = NULL, subtitle = NULL) {
+                          palette = NULL,
+                          tag = NULL, source = NULL, style = NULL, return = c("plot", "table"), title = NULL, subtitle = NULL) {
   return <- match.arg(return)
+  rlang::local_options(panelviz.style = style %||% getOption("panelviz.style", "economist"))
   rows_are_ids <- is.null(by)
   by_use <- if (rows_are_ids) ".id" else by
   tab <- panel_aggregate(x, var, by = by_use, period = period, fun_time = fun_time,
@@ -146,11 +152,11 @@ panel_heatmap <- function(x, var, by = NULL, period = NULL, fun_time = "mean", f
 
   scale <- if (diverge) {
     mid <- mean(tab[[var]], na.rm = TRUE)
-    ggplot2::scale_fill_gradient2(low = "#00587a", mid = "white", high = "#e3120b", midpoint = mid, name = NULL, labels = axis_labeller(var, tab[[var]], fun_group))
-  } else ggplot2::scale_fill_gradientn(colours = palette, name = NULL, labels = axis_labeller(var, tab[[var]], fun_group))
+    ggplot2::scale_fill_gradient2(low = style_spec()$div[1], mid = style_spec()$bg, high = style_spec()$div[2], midpoint = mid, name = NULL, labels = axis_labeller(var, tab[[var]], fun_group))
+  } else ggplot2::scale_fill_gradientn(colours = palette %||% style_spec()$seq, name = NULL, labels = axis_labeller(var, tab[[var]], fun_group))
   tw <- tile_width(info)
   tile_layer <- if (length(unique(tab$.period)) > 30 && !is.null(tw)) ggplot2::geom_tile(colour = NA, width = tw) else
-    ggplot2::geom_tile(colour = "white", linewidth = 0.3)
+    ggplot2::geom_tile(colour = style_spec()$bg, linewidth = 0.3)
   ggplot2::ggplot(tab, ggplot2::aes(.data$.period, .data$.group, fill = .data[[var]])) +
     tile_layer +
     scale +
@@ -160,7 +166,7 @@ panel_heatmap <- function(x, var, by = NULL, period = NULL, fun_time = "mean", f
                                                      barheight = grid::unit(0.5, "lines"))) +
     ggplot2::labs(title = title %||% txt$title,
                   subtitle = subtitle %||% txt$subtitle,
-                  caption = caption_for(tab, info)) +
+                  caption = caption_for(tab, info, source = source)) +
     panel_style(tag) +
     ggplot2::theme(panel.grid = ggplot2::element_blank())
 }
@@ -173,9 +179,10 @@ panel_heatmap <- function(x, var, by = NULL, period = NULL, fun_time = "mean", f
 #' @param log Use a log10 value axis (helps when individuals differ in scale).
 #' @export
 panel_spaghetti <- function(x, var, by = NULL, period = NULL, fun_time = "mean", fun_group = "mean",
-                            n_ids = 100, seed = 1, log = FALSE, tag = NULL, return = c("plot", "table"),
+                            n_ids = 100, seed = 1, log = FALSE, tag = NULL, source = NULL, style = NULL, return = c("plot", "table"),
                             title = NULL, subtitle = NULL) {
   return <- match.arg(return)
+  rlang::local_options(panelviz.style = style %||% getOption("panelviz.style", "economist"))
   ind <- panel_aggregate(x, var, by = unique(c(".id", by)), period = period, fun_time = fun_time)
   avg <- panel_aggregate(x, var, by = by, period = period, fun_time = fun_time, fun_group = fun_group)
   info <- attr(avg, "panel_info")
@@ -191,7 +198,7 @@ panel_spaghetti <- function(x, var, by = NULL, period = NULL, fun_time = "mean",
   txt <- smart_text("spaghetti", avg, var, by, period, fun_time, fun_group, info, list(subtitle = sprintf("%d individual trajectories (thin) and the %s (bold)", length(ids), if (is.character(fun_group)) fun_group else "summary")))
 
   multi <- length(unique(avg$.group)) > 1
-  cols <- rep_len(panel_colours, length(unique(avg$.group))); names(cols) <- sort(unique(avg$.group))
+  cols <- rep_len(style_spec()$palette, length(unique(avg$.group))); names(cols) <- sort(unique(avg$.group))
   base_aes <- ggplot2::aes(.data$.period, .data[[var]])
   layers <- if (multi) list(
     ggplot2::geom_line(data = ind, ggplot2::aes(group = .data$.id, colour = .data$.group),
@@ -199,9 +206,9 @@ panel_spaghetti <- function(x, var, by = NULL, period = NULL, fun_time = "mean",
     ggplot2::geom_line(data = avg, ggplot2::aes(group = .data$.group, colour = .data$.group), linewidth = 1.6),
     ggplot2::scale_colour_manual(values = cols, name = NULL)
   ) else list(
-    ggplot2::geom_line(data = ind, ggplot2::aes(group = .data$.id), colour = "#00405c",
+    ggplot2::geom_line(data = ind, ggplot2::aes(group = .data$.id), colour = style_spec()$palette[1],
                        alpha = 0.22, linewidth = 0.4),
-    ggplot2::geom_line(data = avg, ggplot2::aes(group = .data$.group), colour = "#e3120b", linewidth = 1.8)
+    ggplot2::geom_line(data = avg, ggplot2::aes(group = .data$.group), colour = style_spec()$accent, linewidth = 1.8)
   )
   ggplot2::ggplot(mapping = base_aes) +
     layers +
@@ -209,7 +216,7 @@ panel_spaghetti <- function(x, var, by = NULL, period = NULL, fun_time = "mean",
     y_scale(log, axis_labeller(var, avg[[var]], fun_group)) +
     ggplot2::labs(title = title %||% txt$title,
                   subtitle = subtitle %||% txt$subtitle,
-                  caption = caption_for(avg, info)) +
+                  caption = caption_for(avg, info, source = source)) +
     panel_style(tag)
 }
 
@@ -230,8 +237,8 @@ panel_plot <- function(x, var, kind = c("line", "heatmap", "spaghetti", "trackin
 # Named colours per group; with `highlight`, everything else is grey.
 group_colours <- function(groups, highlight = NULL) {
   g <- sort(unique(groups))
-  if (is.null(highlight)) return(stats::setNames(rep_len(panel_colours, length(g)), g))
-  stats::setNames(ifelse(g %in% highlight, panel_colours[2], "#c9c9c9"), g)
+  if (is.null(highlight)) return(stats::setNames(rep_len(style_spec()$palette, length(g)), g))
+  stats::setNames(ifelse(g %in% highlight, style_spec()$accent, "#c9c9c9"), g)
 }
 
 pretty_name <- function(v) {
@@ -280,9 +287,10 @@ label_nudge <- function(tab, info) {
 #' @param window Number of periods in the (trailing) rolling average.
 #' @export
 panel_tracking <- function(x, var, period = NULL, fun_time = "mean", fun_group = "mean",
-                           window = 4, min_n = NULL, tag = NULL, return = c("plot", "table"),
+                           window = 4, min_n = NULL, tag = NULL, source = NULL, style = NULL, return = c("plot", "table"),
                            title = NULL, subtitle = NULL) {
   return <- match.arg(return)
+  rlang::local_options(panelviz.style = style %||% getOption("panelviz.style", "economist"))
   tab <- panel_aggregate(x, var, period = period, fun_time = fun_time, fun_group = fun_group, min_n = min_n)
   info <- attr(tab, "panel_info")
   tab <- tab[order(tab$.period), ]
@@ -296,11 +304,11 @@ panel_tracking <- function(x, var, period = NULL, fun_time = "mean", fun_group =
   txt <- smart_text("tracking", tab, var, NULL, period, fun_time, fun_group, info, list(window = window))
   ggplot2::ggplot(long, ggplot2::aes(.data$.period, .data$value, colour = .data$series)) +
     ggplot2::geom_line(linewidth = 1.1) +
-    ggplot2::scale_colour_manual(values = c("#00a0dc", "#00405c"), name = NULL) + y_scale(labeller = axis_labeller(var, tab[[var]], fun_group)) +
+    ggplot2::scale_colour_manual(values = style_spec()$track, name = NULL) + y_scale(labeller = axis_labeller(var, tab[[var]], fun_group)) +
     time_scale(info, long$.period, expand = ggplot2::expansion(mult = 0.02)) +
     ggplot2::labs(title = title %||% txt$title,
                   subtitle = subtitle %||% txt$subtitle,
-                  caption = caption_for(tab, info)) +
+                  caption = caption_for(tab, info, source = source)) +
     panel_style(tag)
 }
 
@@ -314,8 +322,9 @@ panel_tracking <- function(x, var, period = NULL, fun_time = "mean", fun_group =
 #' @export
 panel_band <- function(x, var, by = NULL, period = NULL, fun_time = "mean",
                        lower = "p25", upper = "p75", centre = "median", min_n = NULL,
-                       max_groups = 6, tag = NULL, return = c("plot", "table"), title = NULL, subtitle = NULL) {
+                       max_groups = 6, tag = NULL, source = NULL, style = NULL, return = c("plot", "table"), title = NULL, subtitle = NULL) {
   return <- match.arg(return)
+  rlang::local_options(panelviz.style = style %||% getOption("panelviz.style", "economist"))
   one <- function(f, nm) {
     t <- panel_aggregate(x, var, by = by, period = period, fun_time = fun_time, fun_group = f, min_n = min_n)
     names(t)[names(t) == var] <- nm; t
@@ -329,7 +338,7 @@ panel_band <- function(x, var, by = NULL, period = NULL, fun_time = "mean",
   if (return == "table") return(tab)
   txt <- smart_text("band", tab, var, by, period, fun_time, "median", info, list(subtitle = sprintf("Median line, shaded %s to %s across individuals", lower, upper)))
   multi <- length(unique(tab$.group)) > 1
-  cols <- rep_len(panel_colours, length(unique(tab$.group))); names(cols) <- sort(unique(tab$.group))
+  cols <- rep_len(style_spec()$palette, length(unique(tab$.group))); names(cols) <- sort(unique(tab$.group))
   ggplot2::ggplot(tab, ggplot2::aes(.data$.period, group = .data$.group, colour = .data$.group, fill = .data$.group)) +
     ggplot2::geom_ribbon(ggplot2::aes(ymin = .data$.lo, ymax = .data$.hi), alpha = 0.18, colour = NA) +
     ggplot2::geom_line(ggplot2::aes(y = .data$.mid), linewidth = 1.2) +
@@ -337,7 +346,7 @@ panel_band <- function(x, var, by = NULL, period = NULL, fun_time = "mean",
     y_scale(labeller = axis_labeller(var, tab$.mid, "mean")) + time_scale(info, tab$.period, expand = ggplot2::expansion(mult = 0.02)) +
     ggplot2::labs(title = title %||% txt$title,
                   subtitle = subtitle %||% txt$subtitle,
-                  caption = caption_for(tab, info)) +
+                  caption = caption_for(tab, info, source = source)) +
     panel_style(tag) + ggplot2::theme(legend.position = if (multi) "top" else "none")
 }
 
@@ -350,9 +359,10 @@ panel_band <- function(x, var, by = NULL, period = NULL, fun_time = "mean",
 #' @param decreasing Sort largest first.
 #' @export
 panel_bar <- function(x, var, by, period = "all", fun_time = "mean", fun_group = "mean",
-                      min_n = NULL, top_n = 15, decreasing = TRUE, tag = NULL, return = c("plot", "table"),
+                      min_n = NULL, top_n = 15, decreasing = TRUE, tag = NULL, source = NULL, style = NULL, return = c("plot", "table"),
                       title = NULL, subtitle = NULL) {
   return <- match.arg(return)
+  rlang::local_options(panelviz.style = style %||% getOption("panelviz.style", "economist"))
   tab <- panel_aggregate(x, var, by = by, period = period, fun_time = fun_time, fun_group = fun_group, min_n = min_n)
   info <- attr(tab, "panel_info")
   tab <- tab[tab$.period == max(tab$.period), ]
@@ -369,19 +379,19 @@ panel_bar <- function(x, var, by, period = "all", fun_time = "mean", fun_group =
   tab$.name <- ifelse(inside, as.character(tab$.group), "")
   tab$.end <- ifelse(inside, val, paste(tab$.group, val, sep = "  "))
   ggplot2::ggplot(tab, ggplot2::aes(.data[[var]], .data$.label)) +
-    ggplot2::geom_col(fill = econ[["cyan"]], width = 0.78) +
+    ggplot2::geom_col(fill = style_spec()$primary, width = 0.78) +
     ggplot2::geom_text(ggplot2::aes(x = 0, label = .data$.name), hjust = 0, nudge_x = vmax * 0.012,
-                       colour = "white", fontface = "bold", size = 4.2, family = panel_font()) +
-    ggplot2::geom_text(ggplot2::aes(label = .data$.end), hjust = -0.08, colour = ink, size = 4.1, family = panel_font()) +
+                       colour = if (identical(getOption("panelviz.style"), "dark")) "#16222c" else "white", fontface = "bold", size = 4.2, family = panel_font()) +
+    ggplot2::geom_text(ggplot2::aes(label = .data$.end), hjust = -0.08, colour = style_spec()$ink, size = 4.1, family = panel_font()) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.22)), position = "top",
                                 labels = axis_labeller(var, v, fun_group)) +
     ggplot2::labs(title = title %||% txt$title,
                   subtitle = subtitle %||% txt$subtitle,
-                  caption = caption_for(tab, info)) +
+                  caption = caption_for(tab, info, source = source)) +
     panel_style(tag) +
     ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_blank(),
                    axis.line.x = ggplot2::element_blank(), axis.ticks.x = ggplot2::element_blank(),
-                   panel.grid.major.x = ggplot2::element_line(colour = "white", linewidth = 0.7))
+                   panel.grid.major.x = ggplot2::element_line(colour = style_spec()$grid, linewidth = 0.7))
 }
 
 #' Stacked bars: how several measures add up within each group
@@ -392,9 +402,10 @@ panel_bar <- function(x, var, by, period = "all", fun_time = "mean", fun_group =
 #'   share of the longest bar (avoids overflowing labels).
 #' @export
 panel_stacked <- function(x, vars, by, period = "all", fun_time = "mean", fun_group = "mean",
-                          min_n = NULL, top_n = 15, min_label = 0.05, tag = NULL, return = c("plot", "table"),
+                          min_n = NULL, top_n = 15, min_label = 0.05, tag = NULL, source = NULL, style = NULL, return = c("plot", "table"),
                           title = NULL, subtitle = NULL) {
   return <- match.arg(return)
+  rlang::local_options(panelviz.style = style %||% getOption("panelviz.style", "economist"))
   tab <- panel_aggregate(x, vars, by = by, period = period, fun_time = fun_time, fun_group = fun_group, min_n = min_n)
   info <- attr(tab, "panel_info")
   tab <- tab[tab$.period == max(tab$.period), ]
@@ -406,22 +417,22 @@ panel_stacked <- function(x, vars, by, period = "all", fun_time = "mean", fun_gr
   long$.measure <- factor(long$.measure, levels = rev(vars))
   if (return == "table") return(long)
   txt <- smart_text("stacked", long, vars, by, period, fun_time, fun_group, info, list(n = tab$.n))
-  cols <- stats::setNames(rev(rep_len(unname(econ[c("cyan", "navy", "steel", "salmon", "amber", "green")]), length(vars))), rev(vars))
+  cols <- stats::setNames(rev(rep_len(style_spec()$stack, length(vars))), rev(vars))
   cols <- cols[levels(long$.measure)]
   long$.show <- ifelse(long$.value >= min_label * max(tab$.total), fmt_num(long$.value), "")
   ggplot2::ggplot(long, ggplot2::aes(.data$.value, .data$.label, fill = .data$.measure)) +
-    ggplot2::geom_col(width = 0.72, colour = "white", linewidth = 0.3) +
+    ggplot2::geom_col(width = 0.72, colour = style_spec()$bg, linewidth = 0.3) +
     ggplot2::geom_text(ggplot2::aes(label = .data$.show), position = ggplot2::position_stack(vjust = 0.5),
-                       colour = "white", fontface = "bold", size = 4, family = panel_font()) +
+                       colour = if (identical(getOption("panelviz.style"), "dark")) "#16222c" else "white", fontface = "bold", size = 4, family = panel_font()) +
     ggplot2::scale_fill_manual(values = cols, breaks = vars, name = NULL) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.03)), position = "top",
                                 labels = axis_labeller(vars[1], long$.value, fun_group)) +
     ggplot2::labs(title = title %||% txt$title,
                   subtitle = subtitle %||% txt$subtitle,
-                  caption = caption_for(tab, info)) +
+                  caption = caption_for(tab, info, source = source)) +
     panel_style(tag) + ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(), axis.line.x = ggplot2::element_blank(),
                                       axis.ticks.x = ggplot2::element_blank(),
-                                      panel.grid.major.x = ggplot2::element_line(colour = "white", linewidth = 0.7))
+                                      panel.grid.major.x = ggplot2::element_line(colour = style_spec()$grid, linewidth = 0.7))
 }
 
 #' Distribution of individuals
@@ -431,8 +442,9 @@ panel_stacked <- function(x, vars, by, period = "all", fun_time = "mean", fun_gr
 #' @inheritParams panel_line
 #' @export
 panel_distribution <- function(x, var, by = NULL, period = "all", fun_time = "mean",
-                               max_groups = 6, tag = NULL, return = c("plot", "table"), title = NULL, subtitle = NULL) {
+                               max_groups = 6, tag = NULL, source = NULL, style = NULL, return = c("plot", "table"), title = NULL, subtitle = NULL) {
   return <- match.arg(return)
+  rlang::local_options(panelviz.style = style %||% getOption("panelviz.style", "economist"))
   tab <- panel_aggregate(x, var, by = unique(c(".id", by)), period = period, fun_time = fun_time)
   info <- attr(tab, "panel_info")
   tab <- tab[tab$.period == max(tab$.period), ]
@@ -441,15 +453,15 @@ panel_distribution <- function(x, var, by = NULL, period = "all", fun_time = "me
   if (return == "table") return(tab)
   txt <- smart_text("distribution", tab, var, by, period, fun_time, "mean", info, list(subtitle = sprintf("Distribution of individuals (each individual's %s over time)", stat_noun(fun_time))))
   multi <- length(unique(tab$.group)) > 1
-  cols <- rep_len(panel_colours, length(unique(tab$.group))); names(cols) <- sort(unique(tab$.group))
+  cols <- rep_len(style_spec()$palette, length(unique(tab$.group))); names(cols) <- sort(unique(tab$.group))
   ggplot2::ggplot(tab, ggplot2::aes(.data[[var]], fill = .data$.group, colour = .data$.group)) +
     ggplot2::geom_density(alpha = if (multi) 0.25 else 0.6, linewidth = 0.8) +
     ggplot2::scale_fill_manual(values = cols, name = NULL) + ggplot2::scale_colour_manual(values = cols, name = NULL) +
     ggplot2::scale_x_continuous(labels = axis_labeller(var, tab[[var]], "mean")) +
     ggplot2::labs(title = title %||% txt$title,
                   subtitle = subtitle %||% txt$subtitle,
-                  caption = caption_for(tab, info)) +
+                  caption = caption_for(tab, info, source = source)) +
     panel_style(tag) + ggplot2::theme(axis.text.y = ggplot2::element_blank(), panel.grid.major.y = ggplot2::element_blank(),
-                                   panel.grid.major.x = ggplot2::element_line(colour = "white", linewidth = 0.7),
+                                   panel.grid.major.x = ggplot2::element_line(colour = style_spec()$grid, linewidth = 0.7),
                                    legend.position = if (multi) "top" else "none")
 }

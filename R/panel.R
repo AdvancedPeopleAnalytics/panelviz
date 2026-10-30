@@ -1,6 +1,6 @@
 #' Declare a data frame as a panel
 #'
-#' Tell tidyPanel which column(s) identify the individual and which column is
+#' Tell panelviz which column(s) identify the individual and which column is
 #' time. The time format is detected automatically (Date, POSIXct, years,
 #' two-digit years, `"1998 Q1"`, `"2020-03"`, ISO weeks, `"3/14/2021"`,
 #' `yyyymm`, `yyyymmdd`, Stata `%tm`/`%tq`/`%ty` values, plain integers).
@@ -13,6 +13,8 @@
 #'   `"year"`, `"quarter"`, `"month"`, `"week"`, `"index"`.
 #' @param dups What to do when an individual has several rows at the same time:
 #'   `"error"` (default) or `"keep"`.
+#' @param source Where the data comes from, e.g. `"BLS; company reports"`. Shown as
+#'   "Source: ..." in every chart footer.
 #' @return A `tidy_panel`: the data plus standardised `.id` and `.time`
 #'   columns, with the panel structure stored in `attr(, "panel")`.
 #' @examples
@@ -21,7 +23,7 @@
 #'                 y = c(1, 2, 3, 4, 2, 3, 5, 8))
 #' as_panel(d, id = who, time = when)
 #' @export
-as_panel <- function(data, id, time, time_format = NULL, dups = c("error", "keep")) {
+as_panel <- function(data, id, time, time_format = NULL, dups = c("error", "keep"), source = NULL) {
   dups <- match.arg(dups)
   data <- tibble::as_tibble(data)
   id_pos <- tidyselect::eval_select(rlang::enquo(id), data)
@@ -53,7 +55,7 @@ as_panel <- function(data, id, time, time_format = NULL, dups = c("error", "keep
   meta <- list(id = id_cols, time = time_col, kind = tm$kind, freq = freq,
                n_ids = n_ids, n_periods = n_per, n_obs = nrow(out),
                range = range(out$.time), balanced = n_dup == 0 && nrow(out) == n_ids * n_per,
-               dups = n_dup)
+               dups = n_dup, source = source)
   structure(out, panel = meta, class = c("tidy_panel", class(out)))
 }
 
@@ -69,9 +71,8 @@ print.tidy_panel <- function(x, ...) {
   if (!is.null(m)) {
     rng <- if (m$kind == "index") paste(m$range, collapse = " to ") else
       paste(format(m$range), collapse = " to ")
-    cat(sprintf("# A tidy panel: %s individuals x %s periods (%s), %s to %s\n",
-                format(m$n_ids, big.mark = ","), format(m$n_periods, big.mark = ","),
-                m$freq, if (m$kind == "index") "index" else "", rng))
+    cat(sprintf("# A tidy panel: %s individuals x %s periods (%s), %s\n",
+                format(m$n_ids, big.mark = ","), format(m$n_periods, big.mark = ","), m$freq, rng))
     cat(sprintf("# id = %s | time = %s | %s | %s obs\n", paste(m$id, collapse = " + "), m$time,
                 if (m$balanced) "balanced" else sprintf("unbalanced (%.0f%% of id-period cells filled)",
                                                          100 * m$n_obs / (m$n_ids * m$n_periods)),

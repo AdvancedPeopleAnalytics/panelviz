@@ -55,3 +55,16 @@ if (requireNamespace("wpa", quietly = TRUE)) {
   save(panel_heatmap(v, "Collaboration_hours", by = "Organization", diverge = TRUE, tag = 1), "viva_weekly_heat", h = 4.5)
 }
 save(panel_bar(p, "Trips", by = "State", tag = 1), "tourism_bar")
+
+# ---- source footer, styles, numbered figure ----------------------------------
+gm <- read_panel(file.path(raw, "gapminderDataFiveYear.csv"), id = country, time = year, source = "Gapminder")
+for (st in panel_styles()) save(panel_line(gm, "lifeExp", by = "continent", style = st), paste0("style_", st), w = 7, h = 4)
+nl <- read_panel(file.path(raw, "nlswork.dta"), id = idcode, time = year, source = "US Bureau of Labor Statistics, NLS of Young Women")
+tr <- read_panel(file.path(raw, "tourism.csv"), id = c(Region, State, Purpose), time = Quarter, source = "Tourism Research Australia")
+fig <- panel_figure(
+  list(panel_line(gm, "lifeExp", by = "continent"), panel_bar(tr, "Trips", by = "State"),
+       panel_band(nl, "ln_wage", by = "race", lower = "p10", upper = "p90"), panel_heatmap(tr, "Trips", by = "Purpose")),
+  title = "Four views, one grammar", subtitle = "The same panelviz calls on three different panels",
+  source = "Gapminder; Tourism Research Australia; US Bureau of Labor Statistics",
+  notes = "Individuals are countries, tourism flows and women respectively.")
+save_panel(fig, file.path(out, "figure.png"), width = 14, height = 9)

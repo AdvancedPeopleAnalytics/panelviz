@@ -7,7 +7,7 @@
 theme_panel(
   font_size = 12,
   base_family = panel_font(),
-  style = getOption("tidyPanel.style", "economist")
+  style = getOption("panelviz.style", "economist")
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ theme_panel(
 
 \item{base_family}{Font family; defaults to \code{\link[=panel_font]{panel_font()}}.}
 
-\item{style}{\code{"economist"} (default; also \code{options(tidyPanel.style = )}) or \code{"clean"}.}
+\item{style}{One of \code{\link[=panel_styles]{panel_styles()}}; default \code{"economist"} (or \code{options(panelviz.style = )}).}
 }
 \description{
 Theme for panel graphics

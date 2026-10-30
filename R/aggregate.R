@@ -101,7 +101,7 @@ panel_aggregate <- function(x, vars = NULL, by = NULL, period = NULL,
   if (!is.null(min_n)) out <- out[out$.n >= min_n, ]
   out <- out[do.call(order, unname(as.list(out[c(by, ".period")]))), ]
   attr(out, "panel_info") <- list(kind = if (m$kind == "index") "index" else freq_out, freq = freq_out,
-                                  n_ids = m$n_ids, freq_native = m$freq, labels = labels, min_n = min_n,
+                                  n_ids = m$n_ids, freq_native = m$freq, source = m$source, labels = labels, min_n = min_n,
                                   range = if (nrow(out) && freq_out != "all") range(out$.period) else m$range)
   out
 }

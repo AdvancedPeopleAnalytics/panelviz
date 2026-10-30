@@ -5,10 +5,11 @@
 #'
 #' @param path File path or URL.
 #' @inheritParams as_panel
+#' @param source Source line for chart footers; defaults to the file name.
 #' @param ... Passed to the underlying reader.
 #' @return A `tidy_panel`.
 #' @export
-read_panel <- function(path, id, time, time_format = NULL, dups = c("error", "keep"), ...) {
+read_panel <- function(path, id, time, time_format = NULL, dups = c("error", "keep"), source = basename(path), ...) {
   dups <- match.arg(dups)
   ext <- tolower(tools::file_ext(sub("[?#].*$", "", path)))
   need <- function(pkg) if (!requireNamespace(pkg, quietly = TRUE))
@@ -20,5 +21,5 @@ read_panel <- function(path, id, time, time_format = NULL, dups = c("error", "ke
     sav = { need("haven"); haven::read_sav(path, ...) },
     rds = readRDS(path),
     cli::cli_abort("Unsupported file type {.val .{ext}}."))
-  as_panel(data, id = {{ id }}, time = {{ time }}, time_format = time_format, dups = dups)
+  as_panel(data, id = {{ id }}, time = {{ time }}, time_format = time_format, dups = dups, source = source)
 }

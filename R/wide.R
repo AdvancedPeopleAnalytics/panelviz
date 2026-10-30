@@ -18,7 +18,7 @@
 #' as_panel_wide(w, who, cols = c(`2001`, `2002`), values_to = "income")
 #' @export
 as_panel_wide <- function(data, id, cols, names_pattern = NULL, values_to = "value",
-                          time_format = NULL, dups = c("error", "keep")) {
+                          time_format = NULL, dups = c("error", "keep"), source = NULL) {
   dups <- match.arg(dups)
   data <- tibble::as_tibble(data)
   cols <- names(tidyselect::eval_select(rlang::enquo(cols), data))
@@ -30,5 +30,5 @@ as_panel_wide <- function(data, id, cols, names_pattern = NULL, values_to = "val
     tidyr::pivot_longer(data, dplyr::all_of(cols), names_to = c(".value", "period"),
                         names_pattern = names_pattern)
   }
-  as_panel(long, id = dplyr::all_of(id_cols), time = "period", time_format = time_format, dups = dups)
+  as_panel(long, id = dplyr::all_of(id_cols), time = "period", time_format = time_format, dups = dups, source = source)
 }

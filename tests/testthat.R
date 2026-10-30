@@ -1,3 +1,3 @@
 library(testthat)
-library(tidyPanel)
-test_check("tidyPanel")
+library(panelviz)
+test_check("panelviz")

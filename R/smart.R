@@ -5,7 +5,7 @@
 # where it changes. Text: headlines are computed from the plotted table (what
 # moved, who leads, who overtook whom) and the subtitle says in plain English
 # what was calculated. Pass `title`/`subtitle` to override, or set
-# `options(tidyPanel.smart_titles = FALSE)` for the plain variable name.
+# `options(panelviz.smart_titles = FALSE)` for the plain variable name.
 
 # ---- numbers -----------------------------------------------------------------
 
@@ -226,7 +226,7 @@ smart_headline <- function(kind, tab, var, by, info, fun_group = "mean", opts = 
 #' Title and subtitle for a chart
 #' @noRd
 smart_text <- function(kind, tab, var, by, period, fun_time, fun_group, info, opts = list()) {
-  plain <- identical(getOption("tidyPanel.smart_titles"), FALSE)
+  plain <- identical(getOption("panelviz.smart_titles"), FALSE)
   sub <- if (isTRUE(opts$rows_are_ids)) "Each row is an individual" else if (!is.null(opts$subtitle)) opts$subtitle else
     plain_subtitle(var[1], info, by, period, fun_time, fun_group, isTRUE(opts$index), vars = var)
   if (is.null(opts$subtitle) && !isTRUE(opts$rows_are_ids) && !is.null(opts$n) && length(opts$n) > 1 && max(opts$n) > 1) {

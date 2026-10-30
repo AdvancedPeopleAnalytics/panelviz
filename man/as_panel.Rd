@@ -4,7 +4,14 @@
 \alias{as_panel}
 \title{Declare a data frame as a panel}
 \usage{
-as_panel(data, id, time, time_format = NULL, dups = c("error", "keep"))
+as_panel(
+  data,
+  id,
+  time,
+  time_format = NULL,
+  dups = c("error", "keep"),
+  source = NULL
+)
 }
 \arguments{
 \item{data}{A data frame in long format (one row per individual and time).}
@@ -19,13 +26,16 @@ into one composite key. Unquoted names or strings.}
 
 \item{dups}{What to do when an individual has several rows at the same time:
 \code{"error"} (default) or \code{"keep"}.}
+
+\item{source}{Where the data comes from, e.g. \code{"BLS; company reports"}. Shown as
+"Source: ..." in every chart footer.}
 }
 \value{
 A \code{tidy_panel}: the data plus standardised \code{.id} and \code{.time}
 columns, with the panel structure stored in \code{attr(, "panel")}.
 }
 \description{
-Tell tidyPanel which column(s) identify the individual and which column is
+Tell panelviz which column(s) identify the individual and which column is
 time. The time format is detected automatically (Date, POSIXct, years,
 two-digit years, \code{"1998 Q1"}, \code{"2020-03"}, ISO weeks, \code{"3/14/2021"},
 \code{yyyymm}, \code{yyyymmdd}, Stata \verb{\%tm}/\verb{\%tq}/\verb{\%ty} values, plain integers).

@@ -18,6 +18,8 @@ panel_line(
   index = FALSE,
   log = FALSE,
   tag = NULL,
+  source = NULL,
+  style = NULL,
   return = c("plot", "table"),
   title = NULL,
   subtitle = NULL
@@ -57,6 +59,10 @@ periods collapse into one (default \code{"mean"}; use \code{"sum"} for flows).}
 \item{log}{Use a log10 value axis.}
 
 \item{tag}{Optional figure number or label, drawn in a square at the top right.}
+
+\item{source}{Source line for the footer; default is the source given to \code{\link[=as_panel]{as_panel()}}.}
+
+\item{style}{Look for this chart: one of \code{\link[=panel_styles]{panel_styles()}}.}
 
 \item{return}{\code{"plot"} or \code{"table"}.}
 

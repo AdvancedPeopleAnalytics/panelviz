@@ -11,7 +11,8 @@ as_panel_wide(
   names_pattern = NULL,
   values_to = "value",
   time_format = NULL,
-  dups = c("error", "keep")
+  dups = c("error", "keep"),
+  source = NULL
 )
 }
 \arguments{
@@ -32,6 +33,9 @@ measure then period, e.g. \code{"^(inc|ue)(\\\\d+)$"} for \code{inc80}, \code{ue
 
 \item{dups}{What to do when an individual has several rows at the same time:
 \code{"error"} (default) or \code{"keep"}.}
+
+\item{source}{Where the data comes from, e.g. \code{"BLS; company reports"}. Shown as
+"Source: ..." in every chart footer.}
 }
 \value{
 A \code{tidy_panel} whose time column is called \code{period}.

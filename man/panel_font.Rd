@@ -12,5 +12,5 @@ A font family name.
 \description{
 Looks for Econ Sans Condensed, Avenir Next Condensed, Arial Narrow and a few
 other narrow faces, then falls back to the device default. Override with
-\code{options(tidyPanel.font = "My Font")}.
+\code{options(panelviz.font = "My Font")}.
 }

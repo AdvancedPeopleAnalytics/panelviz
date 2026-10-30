@@ -4,7 +4,15 @@
 \alias{read_panel}
 \title{Read a panel from a file or URL}
 \usage{
-read_panel(path, id, time, time_format = NULL, dups = c("error", "keep"), ...)
+read_panel(
+  path,
+  id,
+  time,
+  time_format = NULL,
+  dups = c("error", "keep"),
+  source = basename(path),
+  ...
+)
 }
 \arguments{
 \item{path}{File path or URL.}
@@ -19,6 +27,8 @@ into one composite key. Unquoted names or strings.}
 
 \item{dups}{What to do when an individual has several rows at the same time:
 \code{"error"} (default) or \code{"keep"}.}
+
+\item{source}{Source line for chart footers; defaults to the file name.}
 
 \item{...}{Passed to the underlying reader.}
 }
