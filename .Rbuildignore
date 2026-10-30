@@ -11,4 +11,6 @@ data-raw
 ^_pkgdown\.yml$
 ^_pkgdown$
 ^docs$
-^pkgdown$
+^\.github$
+^.*\.Rcheck$
+^panelviz_.*\.tar\.gz$

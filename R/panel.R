@@ -27,6 +27,7 @@
 as_panel <- function(data, id, time, time_format = NULL, dups = c("error", "keep"), source = NULL) {
   dups <- match.arg(dups)
   data <- tibble::as_tibble(data)
+  if (nrow(data) == 0) cli::cli_abort("{.arg data} must contain at least one row.")
   id_pos <- tidyselect::eval_select(rlang::enquo(id), data)
   time_pos <- tidyselect::eval_select(rlang::enquo(time), data)
   if (length(time_pos) != 1) cli::cli_abort("{.arg time} must select exactly one column.")
@@ -36,10 +37,16 @@ as_panel <- function(data, id, time, time_format = NULL, dups = c("error", "keep
   if (any(c(".id", ".time") %in% names(data)))
     cli::cli_abort("Columns named {.field .id} or {.field .time} already exist; rename them first.")
 
-  key <- if (length(id_cols) == 1) as.character(plain_id(data[[id_cols]])) else
-    do.call(paste, c(lapply(data[id_cols], function(z) as.character(plain_id(z))), sep = " | "))
-  if (anyNA(key)) cli::cli_abort("{sum(is.na(key))} row{?s} ha{?s/ve} a missing id.")
+  ids <- lapply(data[id_cols], function(z) as.character(plain_id(z)))
+  missing_id <- Reduce(`|`, lapply(ids, is.na))
+  if (any(missing_id)) cli::cli_abort("{sum(missing_id)} row{?s} ha{?s/ve} a missing id.")
+  key <- if (length(ids) == 1) ids[[1]] else
+    do.call(paste, c(lapply(ids, function(z) {
+      z <- gsub("\\", "\\\\", z, fixed = TRUE)
+      gsub("|", "\\|", z, fixed = TRUE)
+    }), sep = " | "))
 
+  if (anyNA(data[[time_col]])) cli::cli_abort("{sum(is.na(data[[time_col]]))} row{?s} ha{?s/ve} a missing time value.")
   tm <- parse_time(data[[time_col]], time_format)
   if (anyNA(tm$value)) cli::cli_abort("{sum(is.na(tm$value))} row{?s} ha{?s/ve} a missing time value.")
 

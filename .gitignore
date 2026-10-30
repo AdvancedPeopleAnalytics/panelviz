@@ -4,3 +4,4 @@ data-raw/raw/
 data-raw/out/
 docs/
 *.Rcheck/
+panelviz_*.tar.gz

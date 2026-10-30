@@ -224,6 +224,9 @@ smart_headline <- function(kind, tab, var, by, info, fun_group = "mean", opts = 
 }
 
 #' Title and subtitle for a chart
+#'
+#' Both are returned as plain strings: the line breaks depend on the device the
+#' chart is drawn on, so [wrap_to_width()] puts them in when the chart is drawn.
 #' @noRd
 smart_text <- function(kind, tab, var, by, period, fun_time, fun_group, info, opts = list()) {
   plain <- identical(getOption("panelviz.smart_titles"), FALSE)
@@ -237,7 +240,5 @@ smart_text <- function(kind, tab, var, by, period, fun_time, fun_group, info, op
   }
   ttl <- if (plain) var_label(var[1], info) else
     tryCatch(smart_headline(kind, tab, var, by, info, fun_group, opts), error = function(e) var_label(var[1], info))
-  list(title = wrap_text(ttl, 62), subtitle = wrap_text(sub, 110))
+  list(title = ttl, subtitle = sub)
 }
-
-wrap_text <- function(x, width) paste(strwrap(x, width = width), collapse = "\n")

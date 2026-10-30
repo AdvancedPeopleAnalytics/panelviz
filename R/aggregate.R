@@ -69,13 +69,13 @@ panel_aggregate <- function(x, vars = NULL, by = NULL, period = NULL,
   for (v in setdiff(by, ".id")) if (anyNA(d[[v]])) d[[v]] <- ifelse(is.na(d[[v]]), "(missing)", as.character(d[[v]]))
   freq_out <- m$freq
 
-  if (m$kind == "index") {
+  if (identical(period, "all")) {
+    freq_out <- "all"; d$.period <- rep(min(d$.time), nrow(d))
+  } else if (m$kind == "index") {
     if (!is.null(period)) cli::cli_abort("{.arg period} needs a dated time column; this panel's time is a plain index.")
     d$.period <- d$.time
   } else {
-    if (identical(period, "all")) {
-      freq_out <- "all"; d$.period <- rep(min(d$.time), nrow(d))
-    } else if (!is.null(period)) {
+    if (!is.null(period)) {
       if (!period %in% names(freq_rank)) cli::cli_abort("{.arg period} must be one of {.val {names(freq_rank)}}.")
       if (m$freq %in% names(freq_rank) && freq_rank[[period]] < freq_rank[[m$freq]])
         cli::cli_abort("{.arg period} {.val {period}} is finer than the panel's {m$freq} frequency.")

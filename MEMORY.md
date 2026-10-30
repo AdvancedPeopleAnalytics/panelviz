@@ -63,6 +63,6 @@
   - Repo is `AdvancedPeopleAnalytics/panelviz` (public); local `origin` repointed; `main` in sync at `b5ecc8b`. The old private org repo `tidypanel` is gone (token needed `delete_repo`, granted via `gh auth refresh -s delete_repo`).
   - Shipped a Claude Code skill at `.claude/skills/panelviz/` (excluded from the build in `.Rbuildignore`; README has a "Use with Claude Code" section). Run end to end: install, read, line chart, figure all work.
   - **API gotcha:** `id`/`time` are unquoted (tidyselect); `var`, `by`, `highlight` are quoted strings. Unquoted `by = continent` errors "object not found".
-  - **Open bug, not fixed:** in a 2-column `panel_figure` the left headline runs under the numbered tag and is clipped (`R/figure.R`, `draw_figure`).
+  - **Fixed 2026-10-30 (unreleased branch `users/martinctc/cran-release-prep`):** the left headline no longer runs under the numbered tag; tagged cells get a 40pt top margin and headlines wrap to the measured column width. Related figure fixes in the same branch: cell type/size (`cell_theme()`), compact horizontal legends, measured date breaks, and direct labels kept inside the panel by `fit_direct_labels()` in `R/style.R`.
   - **Not done:** `devtools::document()` / `R CMD check` after hand edits to `DESCRIPTION` and `man/panelviz-package.Rd`; `moralec/panelviz` URLs elsewhere were replaced, but old links still redirect.
   - Palace: I did not run `memory brief` at session start (should have). No `INBOX.md` exists in this project.

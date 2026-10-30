@@ -98,9 +98,12 @@ panel_line <- function(x, var, by = NULL, period = NULL, fun_time = "mean", fun_
   if (return == "table") return(tab)
   txt <- smart_text("line", tab, var, by, period, fun_time, fun_group, info, list(index = index))
 
-  lab_end <- do.call(rbind, lapply(split(tab, tab$.group), function(g) g[which.max(g$.period), ]))
+  lab_end <- tab[!is.na(tab[[var]]), ]
+  lab_end <- lab_end[!duplicated(lab_end$.group, fromLast = TRUE), ]
   if (!is.null(highlight)) lab_end <- lab_end[lab_end$.group %in% highlight, ]
-  lab_end$.y <- spread_labels(lab_end[[var]], diff(range(tab[[var]], na.rm = TRUE)) * 0.045)
+  values <- tab[[var]][is.finite(tab[[var]])]
+  gap <- if (length(values) > 1) diff(range(values)) * 0.045 else 0
+  lab_end$.y <- spread_labels(lab_end[[var]], gap)
   many <- length(unique(tab$.group)) > 1 && !facet
   p <- ggplot2::ggplot(tab, ggplot2::aes(.data$.period, .data[[var]], colour = .data$.group, group = .data$.group)) +
     ggplot2::geom_line(linewidth = 1.3, show.legend = FALSE) +
@@ -189,9 +192,13 @@ panel_spaghetti <- function(x, var, by = NULL, period = NULL, fun_time = "mean",
   ind$.group <- group_col(ind, by); avg$.group <- group_col(avg, by)
   ids <- unique(ind$.id)
   if (length(ids) > n_ids) {
-    old <- if (exists(".Random.seed", globalenv())) get(".Random.seed", globalenv())
+    old <- if (exists(".Random.seed", globalenv(), inherits = FALSE)) get(".Random.seed", globalenv())
+    on.exit({
+      if (!is.null(old)) assign(".Random.seed", old, globalenv()) else
+        if (exists(".Random.seed", globalenv(), inherits = FALSE))
+          rm(".Random.seed", envir = globalenv())
+    }, add = TRUE)
     set.seed(seed); ids <- sample(ids, n_ids)
-    if (!is.null(old)) assign(".Random.seed", old, globalenv())
   }
   ind <- ind[ind$.id %in% ids, ]
   if (return == "table") return(list(individuals = ind, average = avg))
@@ -268,6 +275,12 @@ limit_groups <- function(tab, max_groups) {
 
 # Push sorted label positions apart so direct labels do not collide.
 spread_labels <- function(y, gap) {
+  good <- is.finite(y)
+  if (!all(good)) {
+    y[good] <- spread_labels(y[good], gap)
+    return(y)
+  }
+  if (length(y) < 2) return(y)
   o <- order(y); z <- y[o]
   for (i in seq_along(z)[-1]) if (z[i] - z[i - 1] < gap) z[i] <- z[i - 1] + gap
   shift <- mean(y[o]) - mean(z); y[o] <- z + shift
