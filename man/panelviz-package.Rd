@@ -11,8 +11,8 @@ Visualise any panel data (also called longitudinal data, repeated measures or ti
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/moralec/panelviz}
-  \item Report bugs at \url{https://github.com/moralec/panelviz/issues}
+  \item \url{https://github.com/AdvancedPeopleAnalytics/panelviz}
+  \item Report bugs at \url{https://github.com/AdvancedPeopleAnalytics/panelviz/issues}
 }
 
 }

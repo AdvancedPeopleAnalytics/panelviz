@@ -7,3 +7,4 @@ data-raw
 ^logs$
 ^cran-comments\.md$
 ^assets$
+^\.claude$

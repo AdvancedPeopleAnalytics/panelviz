@@ -12,8 +12,8 @@ Description: Visualise any panel data (also called longitudinal data, repeated
     formats, plain indices), the data is aggregated in two stages (within individual
     over time, then across individuals by group), and publication-quality charts are
     drawn. Generalises the plotting approach of 'wpa' and 'vivainsights'.
-URL: https://github.com/moralec/panelviz
-BugReports: https://github.com/moralec/panelviz/issues
+URL: https://github.com/AdvancedPeopleAnalytics/panelviz
+BugReports: https://github.com/AdvancedPeopleAnalytics/panelviz/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

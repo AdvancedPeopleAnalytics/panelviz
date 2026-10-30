@@ -88,15 +88,22 @@ person-level data, and generalises them to any panel.
 ```r
 # The development version from GitHub:
 # install.packages("pak")
-pak::pak("moralec/panelviz")
+pak::pak("AdvancedPeopleAnalytics/panelviz")
 
 # or
 # install.packages("remotes")
-remotes::install_github("moralec/panelviz")
+remotes::install_github("AdvancedPeopleAnalytics/panelviz")
 ```
 
 panelviz requires R 4.1 or later. The optional packages `haven` (Stata and SPSS files), `readr` (csv),
 `systemfonts` and `ragg` (typefaces and font rendering) extend what it can read and how it renders.
+
+## Use with Claude Code
+
+The repository ships a [Claude Code](https://claude.com/claude-code) skill, `.claude/skills/panelviz/SKILL.md`,
+that lets Claude use panelviz as a charting engine: point it at a file, name the individual and time columns, and
+it writes and checks the chart. Open Claude Code in a clone of this repository and it is picked up
+automatically. To use it in any project, copy the folder to `~/.claude/skills/panelviz/`.
 
 ## Examples
 
