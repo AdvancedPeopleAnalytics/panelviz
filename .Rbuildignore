@@ -8,3 +8,6 @@ data-raw
 ^cran-comments\.md$
 ^assets$
 ^\.claude$
+^\.github$
+^.*\.Rcheck$
+^panelviz_.*\.tar\.gz$
