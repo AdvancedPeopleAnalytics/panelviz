@@ -43,7 +43,31 @@ jobs:
           stopifnot(nrow(package) == 0L, nrow(prose) == 0L)
       - name: Check URLs
         shell: Rscript {0}
-        run: urlchecker::url_check()
+        run: |
+          # urlchecker forces a 5-second timeout, which is too short for
+          # CRAN.R-project.org from CI runners. Re-check timeouts with a
+          # longer timeout before failing.
+          res <- urlchecker::url_check(fail = FALSE, progress = FALSE)
+          if (nrow(res) > 0L) {
+            is_timeout <- grepl("timed out|timeout|could not resolve host", res$Message, ignore.case = TRUE)
+            if (any(is_timeout)) {
+              recheck <- function(url) {
+                tryCatch({
+                  handle <- curl::new_handle(timeout = 30, followlocation = TRUE)
+                  status <- curl::curl_fetch_memory(url, handle = handle)$status_code
+                  status >= 200L && status < 400L
+                }, error = function(e) FALSE)
+              }
+              ok <- vapply(res$URL[is_timeout], recheck, logical(1L))
+              message("Timeout re-checked with a 30-second timeout:")
+              print(data.frame(URL = res$URL[is_timeout], ok = ok))
+              res <- res[!(seq_len(nrow(res)) %in% which(is_timeout)[ok]), , drop = FALSE]
+            }
+          }
+          if (nrow(res) > 0L) {
+            print(res)
+            stop("Found invalid URL(s).", call. = FALSE)
+          }
       - name: Check test coverage
         shell: Rscript {0}
         run: |
