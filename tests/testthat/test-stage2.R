@@ -44,3 +44,59 @@ test_that("every chart type builds and tables round-trip", {
   expect_equal(nrow(tr), 10)
   expect_equal(panel_line(p, "a", by = "g", index = TRUE, return = "table")$a[1], 100)
 })
+
+test_that("line labels tolerate missing endpoints and whole missing groups", {
+  d <- data.frame(id = rep(1:3, each = 3), t = rep(2001:2003, 3),
+                  g = rep(c("a", "b", "c"), each = 3),
+                  y = c(1, 2, NA, 2, 3, 4, NA, NA, NA))
+  chart <- panel_line(as_panel(d, id, t), "y", by = "g")
+  labels <- chart$layers[[2]]$data
+  expect_equal(labels$.group, c("a", "b"))
+  expect_equal(labels$y, c(2, 4))
+  expect_true(all(is.finite(labels$.y)))
+  expect_s3_class(ggplot2::ggplot_build(chart), "ggplot_built")
+})
+
+test_that("line labels stay separated when groups have tied endpoints", {
+  d <- data.frame(id = rep(1:2, each = 2), t = rep(2001:2002, 2),
+                  g = rep(c("Alpha", "Beta"), each = 2), y = c(1, 3, 2, 3))
+  chart <- panel_line(as_panel(d, id, t), "y", by = "g")
+  labels <- chart$layers[[2]]$data
+  expect_lt(labels$.y[1], labels$.y[2])
+  expect_equal(mean(labels$.y), 3)
+})
+
+test_that("spaghetti sampling is reproducible and leaves RNG state unchanged", {
+  q <- as_panel(data.frame(id = rep(1:20, each = 2), t = rep(1:2, 20), y = 1:40), id, t)
+  set.seed(42)
+  old <- .Random.seed
+  a <- panel_spaghetti(q, "y", n_ids = 3, seed = 7, return = "table")
+  expect_identical(.Random.seed, old)
+  expect_equal(length(unique(a$individuals$.id)), 3)
+  expect_identical(a, panel_spaghetti(q, "y", n_ids = 3, seed = 7, return = "table"))
+  rm(".Random.seed", envir = globalenv())
+  on.exit(assign(".Random.seed", old, envir = globalenv()))
+  expect_identical(a, panel_spaghetti(q, "y", n_ids = 3, seed = 7, return = "table"))
+  expect_false(exists(".Random.seed", globalenv(), inherits = FALSE))
+  expect_error(panel_spaghetti(q, "y", n_ids = 3, seed = NA_integer_), "seed")
+  expect_false(exists(".Random.seed", globalenv(), inherits = FALSE))
+})
+
+test_that("chart dispatch builds actual layers and exposes transformed tables", {
+  kinds <- c("line", "heatmap", "spaghetti", "tracking", "band", "bar", "stacked", "distribution")
+  for (kind in kinds) {
+    args <- list(x = p, var = if (kind == "stacked") c("a", "b") else "a", kind = kind)
+    if (kind != "tracking") args$by <- "g"
+    chart <- do.call(panel_plot, args)
+    expect_s3_class(ggplot2::ggplot_build(chart), "ggplot_built")
+    tab <- do.call(panel_plot, c(args, list(return = "table")))
+    expect_true(is.data.frame(tab) || (kind == "spaghetti" && is.list(tab)))
+  }
+  expect_s3_class(ggplot2::ggplot_build(panel_line(p, "a", by = "g", facet = TRUE)), "ggplot_built")
+  expect_message(panel_line(p, "a", by = "g", max_groups = 1), "largest")
+  expect_message(panel_heatmap(p, "a", max_rows = 2), "Showing")
+  expect_s3_class(ggplot2::ggplot_build(panel_heatmap(p, "a", diverge = TRUE)), "ggplot_built")
+  long <- as_panel(data.frame(id = 1, t = seq(as.Date("2020-01-01"), by = "month", length.out = 36),
+                               y = 1:36), id, t)
+  expect_s3_class(ggplot2::ggplot_build(panel_heatmap(long, "y")), "ggplot_built")
+})

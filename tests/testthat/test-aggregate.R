@@ -33,3 +33,36 @@ test_that("plots build for every chart", {
   expect_s3_class(panel_line(p, "y"), "ggplot")
   expect_s3_class(ggplot2::ggplot_build(panel_line(p, "y", by = "grp"))$plot, "ggplot")
 })
+
+test_that("all-time aggregation also supports plain time indices", {
+  q <- as_panel(data.frame(id = rep(c("a", "b"), each = 3),
+                            t = rep(1:3, 2), g = "all", y = c(1, 2, 3, 10, 20, 30)), id, t)
+  a <- panel_aggregate(q, "y", period = "all", fun_time = "sum")
+  expect_equal(a$y, 33)
+  expect_equal(a$.n, 2)
+  expect_equal(panel_bar(q, "y", by = "g", return = "table")$y, 11)
+  expect_equal(nrow(panel_distribution(q, "y", return = "table")), 2)
+  expect_error(panel_aggregate(q, "y", period = "month"), "plain index")
+})
+
+test_that("summaries handle missing data and preserve chronological first and last", {
+  q <- as_panel(data.frame(id = 1, t = c(3, 1, 2, 4), y = c(6, NA, 2, 0)), id, t)
+  expected <- list(mean = 8 / 3, median = 2, sum = 8, sd = stats::sd(c(2, 6, 0)),
+                   min = 0, max = 6, first = 2, last = 0, n = 3, share = 2 / 3,
+                   p0 = 0, p100 = 6)
+  for (f in names(expected))
+    expect_equal(panel_aggregate(q, "y", period = "all", fun_time = f)$y, expected[[f]])
+  q$y <- NA_real_
+  for (f in setdiff(names(expected), "n"))
+    expect_true(is.na(panel_aggregate(q, "y", period = "all", fun_time = f)$y))
+  expect_equal(panel_aggregate(q, "y", period = "all", fun_time = "n")$y, 0)
+})
+
+test_that("invalid aggregation requests fail explicitly", {
+  expect_error(panel_aggregate(p, "absent"), "Unknown column")
+  expect_error(panel_aggregate(p, "grp"), "Not numeric")
+  expect_error(panel_aggregate(p, character()), "No numeric")
+  expect_error(panel_aggregate(p, "y", fun_group = 1), "function or a name")
+  expect_error(panel_aggregate(p, "y", fun_group = "unknown"), "Unknown summary")
+  expect_error(panel_aggregate(p, "y", period = "fortnight"), "must be one of")
+})

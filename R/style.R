@@ -172,7 +172,15 @@ blank_layer_fonts <- function(p) {
 }
 
 with_font_fallback <- function(draw, fallback) {
-  ok <- tryCatch({ suppressWarnings(draw()); TRUE },
+  device <- names(grDevices::dev.cur())
+  fonts <- if (identical(device, "pdf")) names(grDevices::pdfFonts()) else
+    if (identical(device, "postscript")) names(grDevices::postscriptFonts()) else NULL
+  if (!is.null(fonts) && !panel_font() %in% c("", fonts)) {
+    rlang::local_options(panelviz.font = "")
+    fallback()
+    return(invisible())
+  }
+  ok <- tryCatch({ draw(); TRUE },
                  error = function(e) if (grepl("invalid font|font family|font type", conditionMessage(e))) FALSE else stop(e))
   if (!ok) {
     grid::grid.newpage()

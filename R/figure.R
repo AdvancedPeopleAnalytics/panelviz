@@ -26,8 +26,19 @@ panel_figure <- function(plots, ncol = 2, title = NULL, subtitle = NULL, source 
                          tags = TRUE, heights = NULL, widths = NULL, style = NULL) {
   if (!is.list(plots) || inherits(plots, "gg")) plots <- list(plots)
   ok <- vapply(plots, inherits, logical(1), "panel_plot")
+  if (length(plots) == 0) cli::cli_abort("{.arg plots} must contain at least one chart.")
   if (!all(ok)) cli::cli_abort("Every element of {.arg plots} must be a chart from a {.fn panel_*} function.")
+  if (!is.numeric(ncol) || length(ncol) != 1 || is.na(ncol) ||
+      !is.finite(ncol) || ncol < 1 || ncol != floor(ncol))
+    cli::cli_abort("{.arg ncol} must be a positive whole number.")
   n <- length(plots); nrow <- ceiling(n / ncol)
+  check_sizes <- function(sizes, n, arg) {
+    if (!is.null(sizes) && (!is.numeric(sizes) || length(sizes) != n ||
+        anyNA(sizes) || any(!is.finite(sizes) | sizes <= 0)))
+      cli::cli_abort("{.arg {arg}} must contain {n} positive finite value{?s}.")
+  }
+  check_sizes(heights, nrow, "heights")
+  check_sizes(widths, ncol, "widths")
   structure(list(plots = plots, ncol = ncol, nrow = nrow, title = title, subtitle = subtitle,
                  source = source, notes = notes, tags = tags,
                  heights = heights %||% rep(1, nrow), widths = widths %||% rep(1, ncol),
@@ -78,15 +89,40 @@ draw_figure <- function(x, strip) {
     p <- x$plots[[i]]
     p$labels$caption <- NULL
     if (strip) { restores[[length(restores) + 1]] <- blank_layer_fonts(p); p <- strip_font(p) }
-    p <- p + ggplot2::theme(plot.margin = ggplot2::margin(10, 12, 2, 12))
     if (is.null(p$panel_tag) && isTRUE(x$tags)) p$panel_tag <- i
+    p <- p + ggplot2::theme(plot.margin = ggplot2::margin(if (is.null(p$panel_tag)) 10 else 40, 12, 2, 12))
     grid::pushViewport(grid::viewport(layout.pos.row = (i - 1) %/% x$ncol + 2, layout.pos.col = (i - 1) %% x$ncol + 1))
-    grid::grid.draw(ggplot2::ggplotGrob(p))
+    grid::grid.draw(figure_plot_grob(p))
     draw_deco(p, corner = FALSE)
     grid::popViewport()
   }
   grid::popViewport()
   invisible(x)
+}
+
+figure_plot_grob <- function(p) {
+  g <- ggplot2::ggplotGrob(p)
+  width <- grid::convertWidth(grid::unit(1, "npc") - grid::unit(24, "pt"), "in", valueOnly = TRUE)
+  if (width <= 0) cli::cli_abort("Figure columns are too narrow; increase the figure width or reduce {.arg ncol}.")
+  for (name in c("title", "subtitle")) {
+    label <- p$labels[[name]]
+    if (is.null(label) || !is.character(label)) next
+    grob <- g$grobs[[match(name, g$layout$name)]]
+    if (!length(grob$children)) next
+    gp <- grob$children[[1]]$gp
+    lines <- unlist(lapply(strsplit(label, "\n", fixed = TRUE)[[1]], function(line) {
+      chars <- nchar(line)
+      repeat {
+        wrapped <- strwrap(line, width = max(1, chars))
+        sizes <- vapply(wrapped, function(text)
+          grid::convertWidth(grid::grobWidth(grid::textGrob(text, gp = gp)), "in", valueOnly = TRUE), numeric(1))
+        if (all(sizes <= width) || chars <= 1) return(wrapped)
+        chars <- chars - 1
+      }
+    }))
+    p$labels[[name]] <- paste(lines, collapse = "\n")
+  }
+  ggplot2::ggplotGrob(p)
 }
 
 #' @export

@@ -8,3 +8,4 @@ data-raw
 ^cran-comments\.md$
 ^assets$
 ^\.claude$
+^\.github$

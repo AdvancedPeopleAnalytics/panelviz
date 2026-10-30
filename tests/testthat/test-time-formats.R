@@ -39,3 +39,42 @@ test_that("duplicate id-time rows are caught, composite ids fix them", {
   expect_error(as_panel(d, r, t), "repeat")
   expect_equal(panel_meta(as_panel(d, c(r, p), t))$n_ids, 4)
 })
+
+test_that("explicit time formats and unsupported inputs are checked", {
+  expect_equal(kind_of(2001:2003, time_format = "index")$kind, "index")
+  for (f in c("year", "quarter", "month", "week"))
+    expect_equal(kind_of(c("2020-01-01", "2020-02-01"), time_format = f)$kind, "date")
+  expect_error(kind_of(c("bad", "dates")), "Could not recognise")
+  expect_error(kind_of(c("31.01.2020", "bad"), time_format = "%d.%m.%Y"), "did not match")
+  expect_equal(kind_of(factor(c("2020-01", "2020-02")))$freq, "month")
+})
+
+test_that("Stata half-years, years and weeks use their declared epochs", {
+  for (fmt in c("%th", "%ty", "%tw")) {
+    v <- if (fmt == "%ty") 2001:2003 else 0:2
+    p <- as_panel(data.frame(id = 1, t = structure(v, format.stata = fmt)), id, t)
+    expected <- switch(fmt, "%th" = c("1960-01-01", "1960-07-01", "1961-01-01"),
+                       "%ty" = c("2001-01-01", "2002-01-01", "2003-01-01"),
+                       "%tw" = c("1960-01-01", "1960-01-08", "1960-01-15"))
+    expect_equal(p$.time, as.Date(expected))
+  }
+  skip_if_not_installed("haven")
+  x <- haven::labelled(0:2)
+  attr(x, "format.stata") <- "%tm"
+  expect_equal(kind_of(x)$range, as.Date(c("1960-01-01", "1960-03-01")))
+})
+
+test_that("dated aggregation floors to calendar boundaries", {
+  q <- as_panel(data.frame(id = 1, t = as.Date(c("2020-01-03", "2020-01-04")),
+                            y = c(2, 4)), id, t)
+  for (period in c("week", "month", "quarter", "year")) {
+    tab <- panel_aggregate(q, "y", period = period, fun_time = "sum")
+    expect_equal(tab$y, 6)
+    expect_equal(tab$.period, as.Date(if (period == "week") "2019-12-30" else "2020-01-01"))
+  }
+  t0 <- as.POSIXct("2024-01-01 01:10:00", tz = "UTC")
+  q <- as_panel(data.frame(id = 1, t = t0 + c(0, 60, 3600), y = c(1, 3, 8)), id, t)
+  tab <- panel_aggregate(q, "y", period = "hour")
+  expect_equal(format(tab$.period, "%H:%M", tz = "UTC"), c("01:00", "02:00"))
+  expect_equal(tab$y, c(2, 8))
+})

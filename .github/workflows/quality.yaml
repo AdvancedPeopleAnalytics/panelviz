@@ -1,0 +1,59 @@
+name: Package quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::covr
+            any::roxygen2
+            any::spelling
+            any::urlchecker
+            any::xml2
+      - name: Check generated documentation
+        run: |
+          Rscript -e 'roxygen2::roxygenise()'
+          git diff --exit-code -- DESCRIPTION NAMESPACE man
+      - name: Check spelling
+        shell: Rscript {0}
+        run: |
+          words <- readLines("inst/WORDLIST")
+          package <- spelling::spell_check_package()
+          prose <- spelling::spell_check_files(
+            c("README.md", "NEWS.md"), ignore = words, lang = "en_GB"
+          )
+          print(package)
+          print(prose)
+          stopifnot(nrow(package) == 0L, nrow(prose) == 0L)
+      - name: Check URLs
+        shell: Rscript {0}
+        run: urlchecker::url_check()
+      - name: Check test coverage
+        shell: Rscript {0}
+        run: |
+          coverage <- covr::package_coverage()
+          print(coverage)
+          covr::to_cobertura(coverage, filename = "coverage.xml")
+          stopifnot(covr::percent_coverage(coverage) >= 90)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage.xml
+          if-no-files-found: ignore

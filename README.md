@@ -481,7 +481,7 @@ panel_line(gm, "lifeExp", by = "continent", return = "table")
 
 <!-- examples:end -->
 
-> **Not to be confused with [panelView](https://cran.r-project.org/package=panelView)** on CRAN, which plots treatment
+> **Not to be confused with [panelView](https://CRAN.R-project.org/package=panelView)** on CRAN, which plots treatment
 > status and outcomes for causal-inference panels. panelviz is a general toolkit: import, aggregate and chart any panel.
 
 ## Known issues
