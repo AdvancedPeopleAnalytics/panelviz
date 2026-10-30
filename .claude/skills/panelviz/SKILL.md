@@ -19,12 +19,12 @@ Rscript -e 'if (!requireNamespace("panelviz", quietly = TRUE)) pak::pak("Advance
 Rscript -e '
 library(panelviz)
 x <- read_panel("data.csv", id = person_id, time = year)   # or as_panel(df, id =, time =)
-p <- panel_plot(x, "income", kind = "line", by = region)    # see kinds below
+p <- panel_plot(x, "income", kind = "line", by = "region")    # see kinds below
 save_panel(p, "chart.png", width = 9, height = 5)
 '
 ```
 
-`id` and `time` are unquoted column names (tidyselect). `read_panel()` reads csv, xlsx, dta, sav and URLs; use `time_format =` if dates do not parse, and `dups = "keep"` if an individual has several rows per period.
+`id` and `time` are unquoted column names (tidyselect); `var`, `by` and `highlight` are quoted strings (`"income"`, `by = "region"`). `read_panel()` reads csv, xlsx, dta, sav and URLs; use `time_format =` if dates do not parse, and `dups = "keep"` if an individual has several rows per period.
 
 ## 3. Choosing a chart
 
