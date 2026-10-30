@@ -50,8 +50,9 @@
   call; `.palace` name is still `tidyPanel` (local folder name is fine).
 
 - **2026-10-30 (late):** at the user's request Martin Chan was added as `aut` in `DESCRIPTION`, named in the README
-  "Authors" section, and credited with a `Co-authored-by` trailer on the commit. The GitHub collaborator invitation was
-  blocked by the permission system and left for the user to run: `gh api -X PUT repos/moralec/panelviz/collaborators/martinctc -f permission=push`.
+  "Authors" section, and credited with a `Co-authored-by` trailer on the commit. The GitHub collaborator invitation (write, id 340532299) was blocked for me, then sent by the user themselves
+  with `gh api -X PUT repos/moralec/panelviz/collaborators/martinctc -f permission=push`. Pending until Martin accepts at
+  github.com/moralec/panelviz/invitations; cancel with `gh api -X DELETE repos/moralec/panelviz/invitations/340532299`.
   Microsoft Corporation was deliberately NOT added as `cph`: that is a legal claim for a third party, so it needs Martin
   or Microsoft's open-source contact to say yes. Martin had not yet confirmed at the time of writing.
 
