@@ -15,6 +15,7 @@ panel_band(
   centre = "median",
   min_n = NULL,
   max_groups = 6,
+  tag = NULL,
   return = c("plot", "table"),
   title = NULL,
   subtitle = NULL
@@ -44,6 +45,8 @@ periods collapse into one (default \code{"mean"}; use \code{"sum"} for flows).}
 (a privacy / noise threshold).}
 
 \item{max_groups}{Keep only this many groups (largest by individuals).}
+
+\item{tag}{Optional figure number or label, drawn in a square at the top right.}
 
 \item{return}{\code{"plot"} or \code{"table"}.}
 

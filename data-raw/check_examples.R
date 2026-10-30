@@ -2,7 +2,7 @@
 # Usage: Rscript data-raw/check_examples.R   (after data-raw/fetch.R)
 suppressMessages({pkgload::load_all(".", quiet = TRUE); library(ggplot2)})
 raw <- "data-raw/raw"; out <- "data-raw/out"; dir.create(out, FALSE)
-save <- function(p, name, w = 9, h = 5) ggsave(file.path(out, paste0(name, ".png")), p, width = w, height = h, dpi = 100, bg = "white")
+save <- function(p, name, w = 9, h = 5) ggsave(file.path(out, paste0(name, ".png")), p, width = w, height = h, dpi = 100, device = ragg::agg_png)
 csv <- function(f) readr::read_csv(file.path(raw, f), show_col_types = FALSE)
 
 cases <- list(
@@ -48,3 +48,10 @@ cat(sprintf("covid       ids=%d periods=%d freq=%s\n", panel_meta(cv)$n_ids, pan
 save(panel_line(cv, "Deaths", period = "month", fun_time = "last", fun_group = "sum"), "covid_deaths_monthly")
 gm <- read_panel(file.path(raw, "gapminderDataFiveYear.csv"), id = country, time = year)
 save(panel_line(gm, "lifeExp", by = "continent"), "gapminder_life")
+
+# Viva Insights (wpa sample): weekly person data, text dates
+if (requireNamespace("wpa", quietly = TRUE)) {
+  v <- as_panel(wpa::sq_data, PersonId, Date)
+  save(panel_heatmap(v, "Collaboration_hours", by = "Organization", diverge = TRUE, tag = 1), "viva_weekly_heat", h = 4.5)
+}
+save(panel_bar(p, "Trips", by = "State", tag = 1), "tourism_bar")

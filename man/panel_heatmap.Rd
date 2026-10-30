@@ -14,7 +14,8 @@ panel_heatmap(
   min_n = NULL,
   max_rows = 40,
   diverge = FALSE,
-  palette = c("#f4f9fb", "#b4d5dd", "#34b1e2", "#1d627e", "#06303f"),
+  palette = c("#eef5f9", "#b5dcee", "#00a0dc", "#00587a", "#00293d"),
+  tag = NULL,
   return = c("plot", "table"),
   title = NULL,
   subtitle = NULL
@@ -49,6 +50,8 @@ periods collapse into one (default \code{"mean"}; use \code{"sum"} for flows).}
 \item{diverge}{Use a diverging blue-white-red scale centred on the overall mean.}
 
 \item{palette}{Vector of colours for the sequential scale.}
+
+\item{tag}{Optional figure number or label, drawn in a square at the top right.}
 
 \item{return}{\code{"plot"} or \code{"table"}.}
 

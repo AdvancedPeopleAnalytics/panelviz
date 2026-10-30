@@ -50,6 +50,18 @@ panel_aggregate(p, "Trips", by = "State", period = "quarter", fun_group = "p90",
 Summaries by name (`mean median sum sd min max first last n share p10`...) or any function.
 `period` can be `hour day week month quarter year` or `"all"`.
 
+## House style
+
+The default look follows The Economist's charts: red tag at the top left, bold headline over a plain
+subtitle, tinted plot area with white gridlines, value axis on the right, square legend keys at the top
+right, group names inside bars, and optional numbered squares (`tag = 1`). Group sizes move out of the
+labels and into the subtitle ("4 to 84 individuals per state"). The font is the best condensed face found
+(`panel_font()`: Econ Sans Condensed, Avenir Next Condensed, Arial Narrow...); set `options(tidyPanel.font = )`
+to choose. `options(tidyPanel.style = "clean")` gives the plain theme. Use `ragg::agg_png` when saving for the best
+font rendering.
+
+<img src="man/figures/tourism_bar.png" width="640"> <img src="man/figures/gapminder_life.png" width="640">
+
 ## Smart axes and titles
 
 * **Axes** switch units by themselves (`950`, `1.2K`, `6M`) with one precision per axis; rates and shares are

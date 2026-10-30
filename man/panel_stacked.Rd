@@ -14,6 +14,7 @@ panel_stacked(
   min_n = NULL,
   top_n = 15,
   min_label = 0.05,
+  tag = NULL,
   return = c("plot", "table"),
   title = NULL,
   subtitle = NULL
@@ -46,6 +47,8 @@ periods collapse into one (default \code{"mean"}; use \code{"sum"} for flows).}
 
 \item{min_label}{Hide a segment's value label when it is thinner than this
 share of the longest bar (avoids overflowing labels).}
+
+\item{tag}{Optional figure number or label, drawn in a square at the top right.}
 
 \item{return}{\code{"plot"} or \code{"table"}.}
 

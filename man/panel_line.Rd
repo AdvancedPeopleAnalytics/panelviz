@@ -17,6 +17,7 @@ panel_line(
   highlight = NULL,
   index = FALSE,
   log = FALSE,
+  tag = NULL,
   return = c("plot", "table"),
   title = NULL,
   subtitle = NULL
@@ -54,6 +55,8 @@ periods collapse into one (default \code{"mean"}; use \code{"sum"} for flows).}
 \item{index}{Rebase every group so its first period equals 100.}
 
 \item{log}{Use a log10 value axis.}
+
+\item{tag}{Optional figure number or label, drawn in a square at the top right.}
 
 \item{return}{\code{"plot"} or \code{"table"}.}
 

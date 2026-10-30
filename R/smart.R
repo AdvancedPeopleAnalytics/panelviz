@@ -34,7 +34,7 @@ fmt_num <- function(x, var = NULL, fun_group = "mean", values = x) {
     a <- abs(z)
     if (a >= 1e3) return(scales::label_number(accuracy = 0.1, scale_cut = scales::cut_short_scale(), style_negative = "minus")(z))
     s <- format(signif(z, 3), trim = TRUE, scientific = FALSE, drop0trailing = TRUE)
-    sub("-", "−", s, fixed = TRUE)
+    sub("-", "\u2212", s, fixed = TRUE)
   }, character(1), USE.NAMES = FALSE)
 }
 
@@ -74,7 +74,11 @@ period_labels <- function(freq) {
 sentence_case <- function(x) paste0(toupper(substr(x, 1, 1)), substring(x, 2))
 
 # Lower-case a label for mid-sentence use unless it has its own capitals (lifeExp, GDP).
-lower_first <- function(x) ifelse(grepl("[A-Z]", substring(x, 2)), x, paste0(tolower(substr(x, 1, 1)), substring(x, 2)))
+lower_first <- function(x) {
+  tok <- sub("[^A-Za-z0-9].*$", "", x)
+  keep <- grepl("[A-Z]", substring(tok, 2))
+  ifelse(keep, x, paste0(tolower(substr(x, 1, 1)), substring(x, 2)))
+}
 
 # Numeric group codes read better with their column name ("company 6").
 group_name <- function(g, by) if (!is.null(by) && length(by) == 1 && grepl("^-?[0-9.]+$", g)) paste(tolower(by), g) else g
@@ -123,7 +127,7 @@ plain_subtitle <- function(var, info, by = NULL, period = NULL, fun_time = "mean
             if (!is.null(period) && !identical(period, "all"))
               sprintf("after taking each individual's %s per %s", stat_noun(fun_time), period),
             if (index) "indexed: first period = 100")
-  if (length(bits)) txt <- paste0(txt, " · ", paste(bits, collapse = ", "))
+  if (length(bits)) txt <- paste0(txt, " \u00b7 ", paste(bits, collapse = ", "))
   txt
 }
 
@@ -182,9 +186,9 @@ smart_headline <- function(kind, tab, var, by, info, fun_group = "mean", opts = 
         return(sprintf("%s overtook %s as the highest on %s by %s", sentence_case(group_name(b$.group[1], by)), group_name(a$.group[1], by), lower_first(lab), pt(last_p)))
       top <- b[1, ]; bot <- b[nrow(b), ]
       ratio <- if (bot[[v]] > 0) top[[v]] / bot[[v]] else NA
-      if (!is.na(ratio) && ratio >= 1.2 && !is_percent_var(var[1], vals, fun_group))
+      if (!is.na(ratio) && ratio >= 1.2 && ratio < 10 && !is_percent_var(var[1], vals, fun_group))
         return(sprintf("%s is highest on %s, %s the level of %s", sentence_case(group_name(top$.group, by)), lower_first(lab),
-                       if (ratio >= 10) sprintf("%.0f times", ratio) else sprintf("%s times", format(round(ratio, 1), drop0trailing = TRUE)), group_name(bot$.group, by)))
+                       sprintf("%s times", format(round(ratio, 1), drop0trailing = TRUE)), group_name(bot$.group, by)))
       return(sprintf("%s leads on %s at %s, %s trails at %s", sentence_case(group_name(top$.group, by)), lower_first(lab),
                      fmt_num(top[[v]], var[1], fun_group, vals), group_name(bot$.group, by), fmt_num(bot[[v]], var[1], fun_group, vals)))
     }
@@ -225,7 +229,15 @@ smart_text <- function(kind, tab, var, by, period, fun_time, fun_group, info, op
   plain <- identical(getOption("tidyPanel.smart_titles"), FALSE)
   sub <- if (isTRUE(opts$rows_are_ids)) "Each row is an individual" else if (!is.null(opts$subtitle)) opts$subtitle else
     plain_subtitle(var[1], info, by, period, fun_time, fun_group, isTRUE(opts$index), vars = var)
+  if (is.null(opts$subtitle) && !isTRUE(opts$rows_are_ids) && !is.null(opts$n) && length(opts$n) > 1 && max(opts$n) > 1) {
+    r <- range(opts$n)
+    per <- if (!is.null(by) && length(by) == 1) tolower(gsub("[_.]+", " ", by)) else "group"
+    sub <- paste0(sub, " \u00b7 ", if (r[1] == r[2]) sprintf("%s individual%s per %s", format(r[1], big.mark = ","), if (r[1] == 1) "" else "s", per)
+                  else sprintf("%s to %s individuals per %s", format(r[1], big.mark = ","), format(r[2], big.mark = ","), per))
+  }
   ttl <- if (plain) var_label(var[1], info) else
     tryCatch(smart_headline(kind, tab, var, by, info, fun_group, opts), error = function(e) var_label(var[1], info))
-  list(title = ttl, subtitle = sub)
+  list(title = wrap_text(ttl, 62), subtitle = wrap_text(sub, 110))
 }
+
+wrap_text <- function(x, width) paste(strwrap(x, width = width), collapse = "\n")

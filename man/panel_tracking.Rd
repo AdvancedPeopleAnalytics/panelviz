@@ -12,6 +12,7 @@ panel_tracking(
   fun_group = "mean",
   window = 4,
   min_n = NULL,
+  tag = NULL,
   return = c("plot", "table"),
   title = NULL,
   subtitle = NULL
@@ -38,6 +39,8 @@ periods collapse into one (default \code{"mean"}; use \code{"sum"} for flows).}
 
 \item{min_n}{Drop group-periods with fewer than this many individuals
 (a privacy / noise threshold).}
+
+\item{tag}{Optional figure number or label, drawn in a square at the top right.}
 
 \item{return}{\code{"plot"} or \code{"table"}.}
 

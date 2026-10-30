@@ -14,6 +14,7 @@ panel_spaghetti(
   n_ids = 100,
   seed = 1,
   log = FALSE,
+  tag = NULL,
   return = c("plot", "table"),
   title = NULL,
   subtitle = NULL
@@ -44,6 +45,8 @@ periods collapse into one (default \code{"mean"}; use \code{"sum"} for flows).}
 \item{seed}{Seed for the individual sample.}
 
 \item{log}{Use a log10 value axis (helps when individuals differ in scale).}
+
+\item{tag}{Optional figure number or label, drawn in a square at the top right.}
 
 \item{return}{\code{"plot"} or \code{"table"}.}
 

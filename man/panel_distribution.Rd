@@ -11,6 +11,7 @@ panel_distribution(
   period = "all",
   fun_time = "mean",
   max_groups = 6,
+  tag = NULL,
   return = c("plot", "table"),
   title = NULL,
   subtitle = NULL
@@ -33,6 +34,8 @@ per group); \code{NULL} keeps the native frequency. Irregular timestamps
 periods collapse into one (default \code{"mean"}; use \code{"sum"} for flows).}
 
 \item{max_groups}{Keep only this many groups (largest by individuals).}
+
+\item{tag}{Optional figure number or label, drawn in a square at the top right.}
 
 \item{return}{\code{"plot"} or \code{"table"}.}
 
