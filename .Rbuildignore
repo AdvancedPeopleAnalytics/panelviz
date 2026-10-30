@@ -9,3 +9,5 @@ data-raw
 ^assets$
 ^\.claude$
 ^\.github$
+^.*\.Rcheck$
+^panelviz_.*\.tar\.gz$

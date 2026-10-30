@@ -10,6 +10,7 @@ Release preparation:
 * Preserve the caller's random-number state when sampling individual trajectories.
 * Validate figure dimensions and use supported PDF and PostScript fonts before drawing.
 * Wrap figure headlines and subtitles to the available column width and reserve space for numbered tags.
+* Add a getting-started vignette (`vignette("getting-started", "panelviz")`) covering the full workflow on simulated data.
 
 * Declare a panel with `as_panel()`, `as_panel_wide()` or `read_panel()` (csv, tsv, Stata, SPSS, rds; path or URL): say which column is the individual and which is time.
 * Time formats are detected: dates, hourly timestamps, years, two-digit years, quarters, months, ISO weeks, `yyyymm`, text dates, Stata `%tm/%tq/%ty` and plain indices. Ambiguous dates and repeated id-time rows stop with a message.

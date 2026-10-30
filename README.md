@@ -98,6 +98,9 @@ remotes::install_github("AdvancedPeopleAnalytics/panelviz")
 panelviz requires R 4.1 or later. The optional packages `haven` (Stata and SPSS files), `readr` (csv),
 `systemfonts` and `ragg` (typefaces and font rendering) extend what it can read and how it renders.
 
+After installing, run `vignette("getting-started", "panelviz")` for a worked introduction:
+declare the panel, aggregate in two stages, and draw each chart type on simulated data.
+
 ## Use with Claude Code
 
 The repository ships a [Claude Code](https://claude.com/claude-code) skill, `.claude/skills/panelviz/SKILL.md`,
