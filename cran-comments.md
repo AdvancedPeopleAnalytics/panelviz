@@ -27,19 +27,25 @@ First release of a package for importing, aggregating and visualising panel data
 * Provide automatic axes, data-derived titles and five chart styles.
 * Harden identifier handling, missing-value line labels, numeric-index aggregation,
   random-number state preservation, figure layouts and device font fallback.
+* Fit figure cells to their column width: headlines wrap where they are drawn,
+  cell type and legends shrink to leave a readable plot area, and direct line
+  labels stay inside the panel.
+* Include a getting-started vignette covering the whole workflow on simulated data.
 
 ## Additional validation
 
-* 273 test expectations passed, with no failures, warnings or skips.
-* Test coverage is 93.90%, increased from the initial 80.43%.
+* 275 test expectations passed, with no failures, warnings or skips.
+* Local test coverage is 90.69% (93.90% before the figure-fitting change),
+  increased from the initial 80.43%.
 * Package documentation, DESCRIPTION, README and NEWS have no spelling findings
   using British English and an explicit technical word list.
 * Documentation was regenerated with roxygen2 8.1.1 and is in sync.
 * All seven URLs passed the URL check with a 30-second network timeout. The
   urlchecker default five-second timeout was insufficient for the CRAN website
   from this machine.
-* A narrow two-column figure was rendered and inspected for headline wrapping
-  and separation from numbered tags.
+* A narrow two-column figure was rendered and inspected for headline wrapping,
+  separation from numbered tags, label placement and legend layout, and the
+  getting-started vignette was re-knit and checked.
 
 ## Reverse dependencies
 
