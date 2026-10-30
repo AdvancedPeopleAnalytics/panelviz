@@ -1,0 +1,19 @@
+Package: tidyPanel
+Type: Package
+Title: Import, Aggregate and Visualise Any Panel Data
+Version: 0.0.1
+Authors@R: person(given = "Carlos", family = "Morales", role = c("aut", "cre"), email = "moralec@gmail.com")
+Description: Declare which column is the individual and which is time, and
+    'tidyPanel' recognises the id and time formats (dates, years, quarters,
+    months, ISO weeks, Stata date formats, plain indices), organises the data,
+    aggregates it in two stages (within individual over time, then across
+    individuals by group) and draws publication-quality panel graphics.
+    Generalises the plotting approach of 'wpa' and 'vivainsights'.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Depends: R (>= 4.1.0)
+Imports: cli, dplyr, ggplot2, grid, rlang, scales, tibble, tidyr, tidyselect
+Suggests: haven, readr, testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.1
