@@ -1,47 +1,24 @@
-<p align="center"><img src="assets/logo.svg" width="96" alt="panelviz logo"></p>
+# panelviz <img src="assets/logo.svg" align="right" height="138" alt="panelviz logo" />
 
-<h1 align="center">panelviz</h1>
+## Overview
 
-<p align="center">An R package for visualising any panel (longitudinal) data: say which column is the individual and which is time, and get publication-ready charts.</p>
+panelviz is an R package for visualising any panel (longitudinal) data. Given the column that identifies the
+individual and the column that records time, it recognises the time format, aggregates the data over time and across
+individuals, and draws publication-ready charts. It provides a consistent set of functions for each stage:
 
-## Why
-
-Panel data is a common data shape: the same individuals measured again and again over time, stored as one row per
-individual and moment. A quick test: if one column repeats (an id) and another changes (a date, year or wave), you
-have panel data.
-
-The individual can be a person, patient, student, customer, firm, store, country or sensor. The moments can be
-years, quarters, weeks or days. A few examples:
-
-- **Economics and business:** a firm's investment each year, or 4,711 women's wages across 15 survey years.
-- **Public health:** daily COVID-19 case counts for 198 countries, or a patient's blood pressure at every clinic visit.
-- **Education and psychology:** each pupil's test score every term, or a participant's mood across study sessions.
-- **Tourism and retail:** trips per region and purpose each quarter, or sales per store each week.
-- **People analytics:** every employee's weekly collaboration hours, which is the data `wpa` and `vivainsights` were built for.
-
-Each field has its own name for it: *panel data* in economics and business, *longitudinal data* or *repeated
-measures* in medicine, psychology and epidemiology, *time-series cross-section* in political science, *grouped* or
-*hierarchical time series* in forecasting. The individual may be called a subject, unit, entity or participant, and
-time a wave, occasion, visit or period. The shape is the same.
-
-Before you can look at such data, the same chores come up every time: work out what the time column is (`1998`,
-`"1998 Q1"`, `"12/15/2019"`, `202001`?), reshape it, collapse time for each individual, collapse individuals into
-groups, and then turn the result into a chart that is fit to publish. Each step is easy to get subtly wrong: summing a
-stock when you meant its last value, or averaging over groups of three people.
-
-We first solved these chores for weekly Viva Insights person data, in [`wpa`](https://github.com/microsoft/wpa) and
-[`vivainsights`](https://github.com/microsoft/vivainsights), and found the charts were reusable far beyond that data.
-panelviz is that machinery for any panel: you say what the individual is and what time is, and everything else is a
-default you can override.
-
-## What
+- `read_panel()`, `as_panel()` and `as_panel_wide()` declare a data frame, file or URL as a panel (csv, tsv, Stata, SPSS, rds).
+- `panel_aggregate()` aggregates in two stages: within each individual over time, then across individuals by group.
+- `panel_line()`, `panel_heatmap()`, `panel_spaghetti()`, `panel_tracking()`, `panel_band()`, `panel_bar()`,
+  `panel_stacked()` and `panel_distribution()` draw the data. All share the same arguments.
+- `panel_figure()` and `save_panel()` compose numbered multi-panel figures and save any chart.
+- `panel_styles()` and `use_panel_style()` select one of five looks: `economist` (the default), `ft`, `clean`, `dark` and `mono`.
 
 ```r
 library(panelviz)
 nls <- read_panel("https://www.stata-press.com/data/r18/nlswork.dta", id = idcode, time = year)
 
 nls
-#> # A tidy panel: 4,711 individuals x 15 periods (year),  1968-01-01 to 1988-01-01
+#> # A tidy panel: 4,711 individuals x 15 periods (year), 1968-01-01 to 1988-01-01
 #> # id = idcode | time = year | unbalanced (40% of id-period cells filled) | 28,534 obs
 
 panel_line(nls, "ln_wage", by = "race")
@@ -49,42 +26,43 @@ panel_line(nls, "ln_wage", by = "race")
 
 <img src="man/figures/nlswork_line.png" width="640" alt="Line chart of log wage by race">
 
-You get a tidy panel object, a two-stage aggregation you control with `period`, `fun_time` and `fun_group`, and a set of
-charts that share the same arguments. Titles say what the data shows, subtitles say what was calculated, and the
-default look follows The Economist's charts.
+## Why
 
-| Function | What it's for |
-|---|---|
-| `read_panel()`, `as_panel()`, `as_panel_wide()` | Declare the individual and time; read csv, tsv, Stata, SPSS or rds files, from a path or a URL. |
-| `panel_aggregate()` | The two-stage aggregation on its own, returned as a table. |
-| `panel_line()` | One line per group, labelled directly; highlight, index to 100, log scale, small multiples. |
-| `panel_heatmap()` | Groups (or individuals) by time. |
-| `panel_spaghetti()` | Individual trajectories with the group average on top. |
-| `panel_tracking()` | A series with its rolling average. |
-| `panel_band()` | Median with a percentile band across individuals. |
-| `panel_bar()`, `panel_stacked()` | Ranked or composed groups, with group sizes in the subtitle. |
-| `panel_distribution()` | How individuals are distributed. |
-| `panel_figure()`, `save_panel()` | Numbered multi-panel figures with a shared source footer; save any chart. |
-| `panel_plot(kind = )` | Any of the charts, chosen by name. |
-| `panel_styles()`, `use_panel_style()` | `economist` (default), `ft`, `clean`, `dark`, `mono`. |
+Panel data consists of repeated observations of the same individuals over time, stored in long format with one row per
+individual and time point. It arises in economics and business (firms, households, markets), public health and
+epidemiology (patients, clinic visits, countries), education and psychology (pupils, terms, study sessions), tourism
+and retail (regions, stores, quarters) and organisational analytics (employees, weeks). Terminology differs by
+discipline: *panel data* in economics, *longitudinal data* or *repeated measures* in medicine and psychology,
+*time-series cross-section* in political science, and *grouped* or *hierarchical time series* in forecasting. The
+individual may be called a subject, unit, entity or participant, and time a wave, occasion, visit or period.
+
+Analysing such data involves a recurring sequence of steps: identifying the individual and time variables and parsing
+the time format, aggregating over time within each individual, aggregating across individuals into groups, and
+presenting the result in a form suitable for publication. Errors tend to arise at the aggregation steps, for example
+summing a stock variable where its last value is meant, or reporting a statistic for a group too small to be
+meaningful.
+
+panelviz implements this sequence behind a single declaration of the individual and time variables. It originates in
+the plotting functions of [`wpa`](https://github.com/microsoft/wpa) and
+[`vivainsights`](https://github.com/microsoft/vivainsights), which were developed for weekly Viva Insights
+person-level data, and generalises them to any panel.
 
 ## How
 
-Why it stays small and predictable:
-
-- **Time is detected, not configured.** Dates, hourly timestamps, years, two-digit years, `"1998 Q1"`, `"2020-03"`,
-  ISO weeks, `yyyymm`, text dates, Stata `%tm/%tq/%ty` and plain indices all work. Ambiguous dates and repeated
-  id-time rows stop with a message instead of guessing.
-- **Aggregation has two stages, because panels have two dimensions.** First within each individual over time
-  (`fun_time`: `sum` for flows, `last` for stocks), then across individuals into groups (`fun_group`: `mean`, `median`,
-  `p90`, any function). `min_n` hides thin groups and the footer says so.
-- **One set of arguments for every chart.** `by`, `period`, `fun_time`, `fun_group`, `min_n`, `tag`, `source`, `style`
-  and `return = "table"` mean the same everywhere, so learning one chart teaches the rest.
-- **Text is computed from the data.** The headline reports what moved, who leads or who overtook whom; the subtitle
-  says what was calculated; Stata variable labels become names. Override any of it with `title` and `subtitle`.
-- **Axes pick their own units** (`950`, `1.2K`, `6M`), detect percentages, and show the year only where it changes.
-- **Fonts degrade gracefully.** The best condensed face found is used (`panel_font()`); a device that cannot use it
-  gets a clean redraw with its default font.
+- **Time formats are detected.** Dates, hourly timestamps, years, two-digit years, `"1998 Q1"`, `"2020-03"`, ISO weeks,
+  `yyyymm`, text dates, Stata `%tm`, `%tq` and `%ty` values and plain indices are supported. Ambiguous dates and
+  repeated id-time rows stop with an informative error instead of being guessed.
+- **Aggregation has two stages, because a panel has two dimensions.** Time is collapsed within each individual first
+  (`fun_time`: `sum` for flows, `last` for stocks), then individuals are collapsed into groups (`fun_group`: `mean`,
+  `median`, `p90` or any function). `min_n` suppresses groups with too few individuals, and the chart footer reports it.
+- **Every chart takes the same arguments.** `by`, `period`, `fun_time`, `fun_group`, `min_n`, `tag`, `source`, `style` and
+  `return = "table"` have the same meaning in each function.
+- **Text is derived from the data.** The title reports what changed, which group leads or which overtook another; the
+  subtitle states what was calculated; Stata variable labels are used as names. Both can be overridden with `title`
+  and `subtitle`.
+- **Axes select their own units** (`950`, `1.2K`, `6M`), detect percentages, and show the year only where it changes.
+- **Fonts degrade gracefully.** The best available condensed typeface is used (`panel_font()`); a device that cannot
+  render it redraws with its default font.
 
 ## Tested on
 
@@ -99,17 +77,22 @@ Why it stays small and predictable:
 | COVID-19 daily counts | 198 countries, ISO dates, 816 days |
 | `wpa` sample data | hashed person id, text dates `12/15/2019` |
 
-See `data-raw/fetch.R` and `data-raw/check_examples.R` to reproduce.
+`data-raw/fetch.R` and `data-raw/check_examples.R` reproduce these checks.
 
 ## Installation
 
 ```r
+# The development version from GitHub:
+# install.packages("pak")
+pak::pak("moralec/panelviz")
+
+# or
 # install.packages("remotes")
 remotes::install_github("moralec/panelviz")
 ```
 
-Needs R 4.1 or later. `haven` is used for Stata and SPSS files, `readr` for csv, `systemfonts` and `ragg` for the
-best fonts; all optional.
+panelviz requires R 4.1 or later. The optional packages `haven` (Stata and SPSS files), `readr` (csv),
+`systemfonts` and `ragg` (typefaces and font rendering) extend what it can read and how it renders.
 
 ## Examples
 
@@ -267,7 +250,7 @@ panel_line(gm, "lifeExp", by = "continent")
 
 ### Line: highlight one group, index to 100
 
-Grey out everything except what you want the reader to look at, and rebase every group so its first period equals 100.
+Grey out every group except the one being discussed, and rebase every group so that its first period equals 100.
 
 - `highlight`: group name(s) to emphasise
 - `index`: `TRUE` rebases each group to 100 at its first period
