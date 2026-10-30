@@ -58,3 +58,11 @@
 
 
 - **Moved 2026-10-30:** repo transferred from moralec to the AdvancedPeopleAnalytics org; the old private org repo `tidypanel` was deleted (mirror backup was in the session scratchpad only). `origin` now points at the org.
+
+- **Session 2026-10-30 (close), state for next time:**
+  - Repo is `AdvancedPeopleAnalytics/panelviz` (public); local `origin` repointed; `main` in sync at `b5ecc8b`. The old private org repo `tidypanel` is gone (token needed `delete_repo`, granted via `gh auth refresh -s delete_repo`).
+  - Shipped a Claude Code skill at `.claude/skills/panelviz/` (excluded from the build in `.Rbuildignore`; README has a "Use with Claude Code" section). Run end to end: install, read, line chart, figure all work.
+  - **API gotcha:** `id`/`time` are unquoted (tidyselect); `var`, `by`, `highlight` are quoted strings. Unquoted `by = continent` errors "object not found".
+  - **Open bug, not fixed:** in a 2-column `panel_figure` the left headline runs under the numbered tag and is clipped (`R/figure.R`, `draw_figure`).
+  - **Not done:** `devtools::document()` / `R CMD check` after hand edits to `DESCRIPTION` and `man/panelviz-package.Rd`; `moralec/panelviz` URLs elsewhere were replaced, but old links still redirect.
+  - Palace: I did not run `memory brief` at session start (should have). No `INBOX.md` exists in this project.
