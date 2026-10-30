@@ -8,21 +8,33 @@
 
 ## Why
 
-Panel data (the same people, firms or countries observed again and again over time) is everywhere, and every analysis
-repeats the same chores: decode whatever the time column looks like, reshape, collapse time per individual, collapse
-individuals into groups, then fight a plotting library until the chart is fit to publish. Each step is easy to get
-subtly wrong, such as summing a stock instead of taking its last value, or averaging over groups of three people.
+Panel data is a common data shape: the same individuals measured again and again over time, stored as one row per
+individual and moment. A quick test: if one column repeats (an id) and another changes (a date, year or wave), you
+have panel data.
 
-We built these chores once for weekly Viva Insights person data, in [`wpa`](https://github.com/microsoft/wpa) and
-[`vivainsights`](https://github.com/microsoft/vivainsights), and found the plots reusable far beyond that data.
+The individual can be a person, patient, student, customer, firm, store, country or sensor. The moments can be
+years, quarters, weeks or days. A few examples:
+
+- **Economics and business:** a firm's investment each year, or 4,711 women's wages across 15 survey years.
+- **Public health:** daily COVID-19 case counts for 198 countries, or a patient's blood pressure at every clinic visit.
+- **Education and psychology:** each pupil's test score every term, or a participant's mood across study sessions.
+- **Tourism and retail:** trips per region and purpose each quarter, or sales per store each week.
+- **People analytics:** every employee's weekly collaboration hours, which is the data `wpa` and `vivainsights` were built for.
+
+Each field has its own name for it: *panel data* in economics and business, *longitudinal data* or *repeated
+measures* in medicine, psychology and epidemiology, *time-series cross-section* in political science, *grouped* or
+*hierarchical time series* in forecasting. The individual may be called a subject, unit, entity or participant, and
+time a wave, occasion, visit or period. The shape is the same.
+
+Before you can look at such data, the same chores come up every time: work out what the time column is (`1998`,
+`"1998 Q1"`, `"12/15/2019"`, `202001`?), reshape it, collapse time for each individual, collapse individuals into
+groups, and then turn the result into a chart that is fit to publish. Each step is easy to get subtly wrong: summing a
+stock when you meant its last value, or averaging over groups of three people.
+
+We first solved these chores for weekly Viva Insights person data, in [`wpa`](https://github.com/microsoft/wpa) and
+[`vivainsights`](https://github.com/microsoft/vivainsights), and found the charts were reusable far beyond that data.
 panelviz is that machinery for any panel: you say what the individual is and what time is, and everything else is a
 default you can override.
-
-Panel data goes by other names depending on the field: *longitudinal data* or *repeated measures* in medicine,
-psychology and epidemiology; *time-series cross-section* in political science; *cross-sectional time series* in
-Stata; *multilevel* or *growth-curve* data in the social sciences; *grouped* or *hierarchical time series* in
-forecasting. The individual may be a subject, unit, entity, participant, person, firm or country, and time may be a
-wave, occasion, visit, period or year. If your data is one row per individual and moment, panelviz is for you.
 
 ## What
 
