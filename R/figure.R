@@ -59,7 +59,29 @@ draw_figure <- function(x, strip) {
   restores <- list()
   on.exit(for (r in restores) r())
   k <- style_spec(x$style)
-  head_cm <- if (is.null(x$title)) 0.6 else if (is.null(x$subtitle)) 1.7 else 2.4
+  fam <- panel_font()
+  title_width_in <- max(1.5, device_width_in() - 0.5)
+  title_gp <- grid::gpar(col = k$ink, fontface = "bold", fontsize = 19, fontfamily = fam, lineheight = 0.95)
+  sub_gp <- grid::gpar(col = k$ink, fontsize = 13, fontfamily = fam, lineheight = 1.0)
+  fig_title <- wrap_to_width(x$title, title_gp, title_width_in)
+  fig_subtitle <- wrap_to_width(x$subtitle, sub_gp, title_width_in)
+  # The header band is measured off the text it holds, so a headline that runs to
+  # two lines pushes the panels down instead of sitting on them.
+  top_cm <- 0.5
+  g_title <- if (is.null(fig_title)) NULL else
+    grid::textGrob(fig_title, x = grid::unit(12, "pt"),
+                   y = grid::unit(1, "npc") - grid::unit(top_cm, "cm"),
+                   just = c("left", "top"), gp = title_gp)
+  h_title <- if (is.null(g_title)) 0 else
+    grid::convertHeight(grid::grobHeight(g_title), "cm", valueOnly = TRUE)
+  sub_cm <- top_cm + h_title + if (h_title > 0) 0.25 else 0
+  g_sub <- if (is.null(fig_subtitle)) NULL else
+    grid::textGrob(fig_subtitle, x = grid::unit(12, "pt"),
+                   y = grid::unit(1, "npc") - grid::unit(sub_cm, "cm"),
+                   just = c("left", "top"), gp = sub_gp)
+  h_sub <- if (is.null(g_sub)) 0 else
+    grid::convertHeight(grid::grobHeight(g_sub), "cm", valueOnly = TRUE)
+  head_cm <- max(0.6, sub_cm + h_sub + 0.15)
   foot_lines <- figure_lines(x)
   foot_cm <- if (length(foot_lines)) 0.35 + 0.42 * length(foot_lines) else 0.2
   lay <- grid::grid.layout(
@@ -67,19 +89,14 @@ draw_figure <- function(x, strip) {
     heights = grid::unit.c(grid::unit(head_cm, "cm"), grid::unit(x$heights, "null"), grid::unit(foot_cm, "cm")),
     widths = grid::unit(x$widths, "null"))
   grid::grid.rect(gp = grid::gpar(fill = k$bg, col = NA))
-  fam <- panel_font()
   if (identical(k$deco, "tag"))
     grid::grid.rect(x = 0, y = 1, width = grid::unit(1.1, "cm"), height = grid::unit(0.2, "cm"),
                     just = c("left", "top"), gp = grid::gpar(fill = k$decofill, col = NA))
   if (identical(k$deco, "rule"))
     grid::grid.rect(x = 0, y = 1, width = 1, height = grid::unit(0.07, "cm"), just = c("left", "top"),
                     gp = grid::gpar(fill = k$decofill, col = NA))
-  if (!is.null(x$title))
-    grid::grid.text(x$title, x = grid::unit(12, "pt"), y = grid::unit(1, "npc") - grid::unit(0.6, "cm"),
-                    just = c("left", "top"), gp = grid::gpar(col = k$ink, fontface = "bold", fontsize = 19, fontfamily = fam))
-  if (!is.null(x$subtitle))
-    grid::grid.text(x$subtitle, x = grid::unit(12, "pt"), y = grid::unit(1, "npc") - grid::unit(1.45, "cm"),
-                    just = c("left", "top"), gp = grid::gpar(col = k$ink, fontsize = 13, fontfamily = fam))
+  if (!is.null(g_title)) grid::grid.draw(g_title)
+  if (!is.null(g_sub)) grid::grid.draw(g_sub)
   if (length(foot_lines))
     grid::grid.text(paste(foot_lines, collapse = "\n"), x = grid::unit(12, "pt"), y = grid::unit(0.18, "cm"),
                     just = c("left", "bottom"), gp = grid::gpar(col = k$muted, fontsize = 10, lineheight = 1.1, fontfamily = fam))
@@ -101,28 +118,21 @@ draw_figure <- function(x, strip) {
 }
 
 figure_plot_grob <- function(p) {
-  g <- ggplot2::ggplotGrob(p)
+  p <- cell_theme(p)
   width <- grid::convertWidth(grid::unit(1, "npc") - grid::unit(24, "pt"), "in", valueOnly = TRUE)
   if (width <= 0) cli::cli_abort("Figure columns are too narrow; increase the figure width or reduce {.arg ncol}.")
+  p <- fit_legend_to_width(p, width)
+  g <- ggplot2::ggplotGrob(p)
   for (name in c("title", "subtitle")) {
     label <- p$labels[[name]]
     if (is.null(label) || !is.character(label)) next
     grob <- g$grobs[[match(name, g$layout$name)]]
     if (!length(grob$children)) next
     gp <- grob$children[[1]]$gp
-    lines <- unlist(lapply(strsplit(label, "\n", fixed = TRUE)[[1]], function(line) {
-      chars <- nchar(line)
-      repeat {
-        wrapped <- strwrap(line, width = max(1, chars))
-        sizes <- vapply(wrapped, function(text)
-          grid::convertWidth(grid::grobWidth(grid::textGrob(text, gp = gp)), "in", valueOnly = TRUE), numeric(1))
-        if (all(sizes <= width) || chars <= 1) return(wrapped)
-        chars <- chars - 1
-      }
-    }))
-    p$labels[[name]] <- paste(lines, collapse = "\n")
+    if (is.null(gp)) next
+    p$labels[[name]] <- wrap_to_width(label, gp, width)
   }
-  ggplot2::ggplotGrob(p)
+  build_cell_grob(p, width)
 }
 
 #' @export

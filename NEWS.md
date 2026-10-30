@@ -10,6 +10,8 @@ Release preparation:
 * Preserve the caller's random-number state when sampling individual trajectories.
 * Validate figure dimensions and use supported PDF and PostScript fonts before drawing.
 * Wrap figure headlines and subtitles to the available column width and reserve space for numbered tags.
+* Keep direct line labels inside the panel by measuring the drawn label positions and widening the x-axis expansion to fit them.
+* Lay out figure legend keys in compact rows and shrink type so cells keep a readable plot area.
 * Add a getting-started vignette (`vignette("getting-started", "panelviz")`) covering the full workflow on simulated data.
 
 * Declare a panel with `as_panel()`, `as_panel_wide()` or `read_panel()` (csv, tsv, Stata, SPSS, rds; path or URL): say which column is the individual and which is time.

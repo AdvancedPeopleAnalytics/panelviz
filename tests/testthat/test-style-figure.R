@@ -95,6 +95,30 @@ test_that("figure headlines wrap to the actual column width", {
   expect_invisible(print(fig))
 })
 
+test_that("cell direct labels stay inside the panel", {
+  old <- options(panelviz.font = "")
+  on.exit(options(old))
+  lg <- data.frame(who = rep(1:6, each = 5), yr = rep(2001:2005, 6),
+                   g = rep(c("Development", "Marketing"), each = 15),
+                   a = rep(1:6, each = 5) * 1.5)
+  chart <- panel_line(as_panel(lg, who, yr, source = "Unit test data"), "a", by = "g")
+  x_sc <- Filter(function(s) "x" %in% s$aesthetics && inherits(s, "ScaleContinuous"),
+                 chart$scales$scales)[[1]]
+  before <- x_sc$expand
+  out <- tempfile(fileext = ".pdf")
+  grDevices::pdf(out, width = 6, height = 5)
+  on.exit({ grDevices::dev.off(); unlink(out) }, add = TRUE)
+  grid::pushViewport(grid::viewport(width = grid::unit(3, "in")))
+  grob <- figure_plot_grob(chart)
+  cell <- grid::convertWidth(grid::unit(1, "npc"), "in", valueOnly = TRUE)
+  P <- panel_width_in(grob, cell)
+  edge <- panel_label_edge(grob, P)
+  grid::popViewport()
+  expect_true(is.finite(P) && is.finite(edge))
+  expect_lte(edge, P)                    # the words are back inside the plot
+  expect_identical(x_sc$expand, before)  # and the chart is left as we found it
+})
+
 test_that("font fallback does not hide unrelated rendering problems", {
   old <- options(panelviz.font = "")
   on.exit(options(old))
