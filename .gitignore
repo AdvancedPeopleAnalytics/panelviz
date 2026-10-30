@@ -2,3 +2,5 @@
 .Rhistory
 data-raw/raw/
 data-raw/out/
+docs/
+*.Rcheck/

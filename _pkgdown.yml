@@ -1,0 +1,58 @@
+url: https://advancedpeopleanalytics.github.io/panelviz/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#00405c"
+    link-color: "#0072a3"
+  light-switch: true
+
+development:
+  mode: auto
+
+reference:
+  - title: "Declare and import panels"
+    desc: >
+      Say which column is the individual and which is time, or read a file or
+      URL straight into a panel.
+    contents:
+      - as_panel
+      - as_panel_wide
+      - read_panel
+      - panel_meta
+  - title: "Aggregate"
+    desc: >
+      Aggregate within individuals over time, then across individuals by group,
+      with an optional group-size floor.
+    contents:
+      - panel_aggregate
+  - title: "Charts"
+    desc: >
+      One chart per question. All chart functions share the same arguments for
+      selecting groups, periods, aggregation and style.
+    contents:
+      - panel_plot
+      - panel_line
+      - panel_heatmap
+      - panel_spaghetti
+      - panel_tracking
+      - panel_band
+      - panel_bar
+      - panel_stacked
+      - panel_distribution
+  - title: "Compose and save"
+    contents:
+      - panel_figure
+      - save_panel
+  - title: "Style"
+    desc: >
+      Five looks, set globally or per chart, plus the theme and font hooks
+      behind them.
+    contents:
+      - panel_styles
+      - use_panel_style
+      - theme_panel
+      - panel_font
+  - title: "Package"
+    contents:
+      - panelviz-package

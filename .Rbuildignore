@@ -8,3 +8,7 @@ data-raw
 ^cran-comments\.md$
 ^assets$
 ^\.claude$
+^_pkgdown\.yml$
+^_pkgdown$
+^docs$
+^pkgdown$
