@@ -2,7 +2,7 @@
 
 <h1 align="center">panelviz</h1>
 
-<p align="center">An R package for visualising any panel data: say which column is the individual and which is time, and get publication-ready charts.</p>
+<p align="center">An R package for visualising any panel (longitudinal) data: say which column is the individual and which is time, and get publication-ready charts.</p>
 
 > **Preview — v0.0.1.** Works and is tested on eight public panels, but the API may still change; see [Known issues](#known-issues-v001). Feedback welcome via GitHub issues.
 
