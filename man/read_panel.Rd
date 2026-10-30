@@ -17,10 +17,11 @@ read_panel(
 \arguments{
 \item{path}{File path or URL.}
 
-\item{id}{Column(s) identifying the individual. Several columns are combined
+\item{id}{Column(s) identifying the individual (a subject, unit, entity, participant, firm or
+country in other fields). Several columns are combined
 into one composite key. Unquoted names or strings.}
 
-\item{time}{The time column.}
+\item{time}{The time column (a wave, occasion, visit, period or year in other fields).}
 
 \item{time_format}{\code{NULL} (auto-detect), a \code{\link[=strptime]{strptime()}} string, or one of
 \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, \code{"index"}.}

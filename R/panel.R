@@ -6,9 +6,10 @@
 #' `yyyymm`, `yyyymmdd`, Stata `%tm`/`%tq`/`%ty` values, plain integers).
 #'
 #' @param data A data frame in long format (one row per individual and time).
-#' @param id Column(s) identifying the individual. Several columns are combined
+#' @param id Column(s) identifying the individual (a subject, unit, entity, participant, firm or
+#'   country in other fields). Several columns are combined
 #'   into one composite key. Unquoted names or strings.
-#' @param time The time column.
+#' @param time The time column (a wave, occasion, visit, period or year in other fields).
 #' @param time_format `NULL` (auto-detect), a [strptime()] string, or one of
 #'   `"year"`, `"quarter"`, `"month"`, `"week"`, `"index"`.
 #' @param dups What to do when an individual has several rows at the same time:

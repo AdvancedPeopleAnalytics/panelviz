@@ -6,7 +6,7 @@
 \alias{panelviz-package}
 \title{panelviz: Import, Aggregate and Visualise Any Panel Data}
 \description{
-Declare which column is the individual and which is time, and 'panelviz' recognises the id and time formats (dates, years, quarters, months, ISO weeks, Stata date formats, plain indices), organises the data, aggregates it in two stages (within individual over time, then across individuals by group) and draws publication-quality panel graphics. Generalises the plotting approach of 'wpa' and 'vivainsights'.
+Visualise any panel data (also called longitudinal data, repeated measures or time-series cross-section: the same individuals observed over time). Declare which column is the individual and which is time; the id and time formats are recognised (dates, years, quarters, months, ISO weeks, Stata date formats, plain indices), the data is aggregated in two stages (within individual over time, then across individuals by group), and publication-quality charts are drawn. Generalises the plotting approach of 'wpa' and 'vivainsights'.
 }
 \seealso{
 Useful links:

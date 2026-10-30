@@ -2,7 +2,7 @@
 
 <h1 align="center">panelviz</h1>
 
-<p align="center">Tell it which column is the individual and which is time. It does the rest: recognises the formats, aggregates in two stages, and draws the chart.</p>
+<p align="center">An R package for visualising any panel data: say which column is the individual and which is time, and get publication-ready charts.</p>
 
 > **Preview — v0.0.1.** Works and is tested on eight public panels, but the API may still change; see [Known issues](#known-issues-v001). Feedback welcome via GitHub issues.
 
@@ -17,6 +17,12 @@ We built these chores once for weekly Viva Insights person data, in [`wpa`](http
 [`vivainsights`](https://github.com/microsoft/vivainsights), and found the plots reusable far beyond that data.
 panelviz is that machinery for any panel: you say what the individual is and what time is, and everything else is a
 default you can override.
+
+Panel data goes by other names depending on the field: *longitudinal data* or *repeated measures* in medicine,
+psychology and epidemiology; *time-series cross-section* in political science; *cross-sectional time series* in
+Stata; *multilevel* or *growth-curve* data in the social sciences; *grouped* or *hierarchical time series* in
+forecasting. The individual may be a subject, unit, entity, participant, person, firm or country, and time may be a
+wave, occasion, visit, period or year. If your data is one row per individual and moment, panelviz is for you.
 
 ## What
 
