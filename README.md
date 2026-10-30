@@ -487,6 +487,12 @@ panel_line(gm, "lifeExp", by = "continent", return = "table")
 5. Group names in direct line labels can still overlap when many series end at nearly the same value.
 6. Only R for now.
 
+## Authors
+
+panelviz is written by Carlos Morales and [Martin Chan](https://github.com/martinctc). It generalises the plotting
+approach of [`wpa`](https://github.com/microsoft/wpa) and [`vivainsights`](https://github.com/microsoft/vivainsights),
+which the two authors developed at Microsoft.
+
 ## Licence
 
 MIT. Generalises the plotting approach of `wpa` and `vivainsights` (Microsoft, MIT).

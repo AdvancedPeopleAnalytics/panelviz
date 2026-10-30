@@ -49,3 +49,9 @@
 - **Open question for the user:** Palace registry may hold a stray row from an accidental `memory adopt --help`
   call; `.palace` name is still `tidyPanel` (local folder name is fine).
 
+- **2026-10-30 (late):** at the user's request Martin Chan was added as `aut` in `DESCRIPTION`, named in the README
+  "Authors" section, and credited with a `Co-authored-by` trailer on the commit. The GitHub collaborator invitation was
+  blocked by the permission system and left for the user to run: `gh api -X PUT repos/moralec/panelviz/collaborators/martinctc -f permission=push`.
+  Microsoft Corporation was deliberately NOT added as `cph`: that is a legal claim for a third party, so it needs Martin
+  or Microsoft's open-source contact to say yes. Martin had not yet confirmed at the time of writing.
+

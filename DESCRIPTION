@@ -2,7 +2,9 @@ Package: panelviz
 Type: Package
 Title: Import, Aggregate and Visualise Any Panel Data
 Version: 1.0.0
-Authors@R: person(given = "Carlos", family = "Morales", role = c("aut", "cre"), email = "moralec@gmail.com")
+Authors@R: c(
+    person(given = "Carlos", family = "Morales", role = c("aut", "cre"), email = "moralec@gmail.com"),
+    person(given = "Martin", family = "Chan", role = "aut", email = "martin.chan@microsoft.com"))
 Description: Visualise any panel data (also called longitudinal data, repeated
     measures or time-series cross-section: the same individuals observed over time).
     Declare which column is the individual and which is time; the id and time
