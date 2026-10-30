@@ -1,4 +1,8 @@
-# panelviz <img src="assets/logo.svg" align="right" height="138" alt="panelviz logo" />
+<p align="center"><img src="assets/logo.svg" width="96" alt="panelviz logo"></p>
+
+<h1 align="center">panelviz</h1>
+
+<p align="center">An R package for visualising any panel (longitudinal) data: say which column is the individual and which is time, and get publication-ready charts.</p>
 
 ## Overview
 
