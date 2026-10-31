@@ -1,6 +1,6 @@
 # Logo options in the tinyCode lineage (square-pixel SVG, crisp edges) plus a tidyverse-style hex.
 # Rscript data-raw/logo.R   -> data-raw/out/logo-options/*.svg and a contact sheet
-# The chosen logo is option 2 (panel grid), copied to assets/logo.svg
+# The chosen logo is option 2 (panel grid), copied to man/figures/logo.svg
 seq5 <- c(a = "#cfe6f2", b = "#8fc6e3", c = "#00a0dc", d = "#00587a", e = "#00293d")
 navy <- "#00405c"; cyan <- "#00a0dc"; steel <- "#6b8ea4"; red <- "#e3120b"; pale <- "#d6e4ec"
 

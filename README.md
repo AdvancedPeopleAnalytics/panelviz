@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/logo.svg" width="96" alt="panelviz logo"></p>
+<p align="center"><img src="man/figures/logo.svg" width="96" alt="panelviz logo"></p>
 
 <h1 align="center">panelviz</h1>
 
