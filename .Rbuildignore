@@ -10,6 +10,7 @@ data-raw
 ^\.claude$
 ^_pkgdown\.yml$
 ^_pkgdown$
+^pkgdown$
 ^docs$
 ^\.github$
 ^.*\.Rcheck$
